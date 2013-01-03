@@ -9,9 +9,8 @@
 
 namespace lithium\data\source\database\adapter;
 
-use SQLite3 as SQLite;
-use SQLite3Result;
-use lithium\data\model\QueryException;
+use PDOException;
+use lithium\core\ConfigException;
 
 /**
  * Sqlite database driver
@@ -19,13 +18,6 @@ use lithium\data\model\QueryException;
  * @todo fix encoding methods to use class query methods instead of sqlite3 natives
  */
 class Sqlite3 extends \lithium\data\source\Database {
-
-	protected $_classes = array(
-		'entity' => 'lithium\data\entity\Record',
-		'set' => 'lithium\data\collection\RecordSet',
-		'relationship' => 'lithium\data\model\Relationship',
-		'result' => 'lithium\data\source\database\adapter\sqlite3\Result'
-	);
 
 	/**
 	 * Pair of opening and closing quote characters used for quoting identifiers in queries.
@@ -41,10 +33,10 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 * @var array
 	 */
 	protected $_columns = array(
-		'primary_key' => array('name' => 'integer primary key'),
-		'string' => array('name' => 'varchar', 'limit' => '255'),
+		'primary_key' => array('name' => 'primary key autoincrement'),
+		'string' => array('name' => 'varchar', 'length' => 255),
 		'text' => array('name' => 'text'),
-		'integer' => array('name' => 'integer', 'limit' => 11, 'formatter' => 'intval'),
+		'integer' => array('name' => 'integer', 'formatter' => 'intval'),
 		'float' => array('name' => 'float', 'formatter' => 'floatval'),
 		'datetime' => array('name' => 'datetime', 'format' => 'Y-m-d H:i:s', 'formatter' => 'date'),
 		'timestamp' => array(
@@ -86,11 +78,7 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 * list of active connections.
 	 */
 	public function __construct(array $config = array()) {
-		$defaults = array(
-			'database'   => '',
-			'flags'      => SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,
-			'key'        => null
-		);
+		$defaults = array('database' => ':memory:', 'encoding' => null);
 		parent::__construct($config + $defaults);
 	}
 
@@ -103,7 +91,7 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 */
 	public static function enabled($feature = null) {
 		if (!$feature) {
-			return extension_loaded('sqlite3');
+			return extension_loaded('pdo_sqlite');
 		}
 		$features = array(
 			'arrays' => false,
@@ -120,10 +108,15 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 * @return boolean True if the database could be connected, else false
 	 */
 	public function connect() {
-		$this->connection = new SQLite(
-			$this->_config['database'], $this->_config['flags'], $this->_config['key']
-		);
-		return $this->_isConnected = (boolean) $this->connection;
+		if (!$this->_config['database']) {
+			throw new ConfigException('No Database configured');
+		}
+
+		if (empty($this->_config['dsn'])) {
+			$this->_config['dsn'] = sprintf("sqlite:%s", $this->_config['database']);
+		}
+
+		return parent::connect();
 	}
 
 	/**
@@ -132,7 +125,11 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 * @return boolean True on success, else false.
 	 */
 	public function disconnect() {
-		return !$this->_isConnected || !($this->_isConnected = !$this->connection->close());
+		if ($this->_isConnected) {
+			unset($this->connection);
+			$this->_isConnected = false;
+		}
+		return true;
 	}
 
 	/**
@@ -169,6 +166,7 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 * @param mixed $entity Specifies the table name for which the schema should be returned, or
 	 *        the class name of the model object requesting the schema, in which case the model
 	 *        class will be queried for the correct table name.
+	 * @param array $fields Any schema data pre-defined by the model.
 	 * @param array $meta
 	 * @return array Returns an associative array describing the given table's schema, where the
 	 *         array keys are the available fields, and the values are arrays describing each
@@ -176,16 +174,18 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 *         - `'type'`: The field type name
 	 * @filter This method can be filtered.
 	 */
-	public function describe($entity, array $meta = array()) {
-		$params = compact('entity', 'meta');
+	public function describe($entity, $fields = array(), array $meta = array()) {
+		$params = compact('entity', 'meta', 'fields');
 		$regex = $this->_regex;
 		return $this->_filter(__METHOD__, $params, function($self, $params) use ($regex) {
 			extract($params);
 
+			if ($fields) {
+				return $self->invokeMethod('_instance', array('schema', compact('fields')));
+			}
 			$name = $self->invokeMethod('_entityName', array($entity, array('quoted' => true)));
 			$columns = $self->read("PRAGMA table_info({$name})", array('return' => 'array'));
 			$fields = array();
-
 			foreach ($columns as $column) {
 				preg_match("/{$regex['column']}/", $column['type'], $matches);
 
@@ -196,18 +196,19 @@ class Sqlite3 extends \lithium\data\source\Database {
 					'default' => $column['dflt_value']
 				);
 			}
-			return $fields;
+			return $self->invokeMethod('_instance', array('schema', compact('fields')));
 		});
 	}
 
 	/**
-	 * Get the last insert id from the database.
+	 * Gets the last auto-generated ID from the query that inserted a new record.
 	 *
-	 * @param object $query The given query, usually an instance of `lithium\data\model\Query`.
-	 * @return void
+	 * @param object $query The `Query` object associated with the query which generated
+	 * @return mixed Returns the last inserted ID key for an auto-increment column or a column
+	 *         bound to a sequence.
 	 */
 	protected function _insertId($query) {
-		return $this->connection->lastInsertRowID();
+		return $this->connection->lastInsertId();
 	}
 
 	/**
@@ -222,51 +223,18 @@ class Sqlite3 extends \lithium\data\source\Database {
 		$encodingMap = array('UTF-8' => 'utf8');
 
 		if (!$encoding) {
-			$encoding = $this->connection->querySingle('PRAGMA encoding');
+			$query = $this->connection->query('PRAGMA encoding');
+			$encoding = $query->fetchColumn();
 			return ($key = array_search($encoding, $encodingMap)) ? $key : $encoding;
 		}
 		$encoding = isset($encodingMap[$encoding]) ? $encodingMap[$encoding] : $encoding;
-		$this->connection->exec("PRAGMA encoding = \"{$encoding}\"");
-		return $this->connection->querySingle("PRAGMA encoding");
-	}
 
-	/**
-	 * Converts a given value into the proper type based on a given schema definition.
-	 *
-	 * @link http://www.sqlite.org/lang_keywords.html
-	 * @see lithium\data\source\Database::schema()
-	 * @param mixed $value The value to be converted. Arrays will be recursively converted.
-	 * @param array $schema Formatted array from `lithium\data\source\Database::schema()`
-	 * @return mixed Value with converted type.
-	 */
-	public function value($value, array $schema = array()) {
-		if (is_array($value)) {
-			return parent::value($value, $schema);
+		try {
+			$this->connection->exec("PRAGMA encoding = \"{$encoding}\"");
+			return true;
+		} catch (PDOException $e) {
+			return false;
 		}
-		return "'" . $this->connection->escapeString($value) . "'";
-	}
-
-	/**
-	 * In cases where the query is a raw string (as opposed to a `Query` object), to database must
-	 * determine the correct column names from the result resource.
-	 *
-	 * @param mixed $query
-	 * @param resource $resource
-	 * @param object $context
-	 * @return array
-	 */
-	public function schema($query, $resource = null, $context = null) {
-		if (is_object($query)) {
-			return parent::schema($query, $resource, $context);
-		}
-
-		$result = array();
-		$count = $resource->numColumns();
-
-		for ($i = 0; $i < $count; $i++) {
-			$result[] = $resource->columnName($i);
-		}
-		return $result;
 	}
 
 	/**
@@ -275,8 +243,8 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 * @return array
 	 */
 	public function error() {
-		if ($this->connection->lastErrorMsg()) {
-			return array($this->connection->lastErrorCode(), $this->connection->lastErrorMsg());
+		if ($error = $this->connection->errorInfo()) {
+			return array($error[1], $error[2]);
 		}
 	}
 
@@ -290,16 +258,16 @@ class Sqlite3 extends \lithium\data\source\Database {
 	 * @filter
 	 */
 	protected function _execute($sql, array $options = array()) {
+		$conn = $this->connection;
 		$params = compact('sql', 'options');
-		$conn =& $this->connection;
-
-		return $this->_filter(__METHOD__, $params, function($self, $params) use (&$conn) {
-			extract($params);
-
-			if (!($resource = $conn->query($sql)) instanceof SQLite3Result) {
-				list($code, $error) = $self->error();
-				throw new QueryException("{$sql}: {$error}", $code);
-			}
+		return $this->_filter(__METHOD__, $params, function($self, $params) use ($conn) {
+			$sql = $params['sql'];
+			$options = $params['options'];
+			try {
+				$resource = $conn->query($sql);
+			} catch(PDOException $e) {
+				$self->invokeMethod('_error', array($sql));
+			};
 			return $self->invokeMethod('_instance', array('result', compact('resource')));
 		});
 	}
@@ -319,6 +287,12 @@ class Sqlite3 extends \lithium\data\source\Database {
 			return $real;
 		}
 		$column = array_intersect_key($column, array('type' => null, 'length' => null));
+
+		if (isset($column['length']) && $column['length']) {
+			$length = explode(',', $column['length']) + array(null, null);
+			$column['length'] = $length[0] ? intval($length[0]) : null;
+			$length[1] ? $column['precision'] = intval($length[1]) : null;
+		}
 
 		switch (true) {
 			case in_array($column['type'], array('date', 'time', 'datetime', 'timestamp')):

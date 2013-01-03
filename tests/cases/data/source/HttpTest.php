@@ -9,7 +9,6 @@
 namespace lithium\tests\cases\data\source;
 
 use lithium\data\source\Http;
-use lithium\data\Connections;
 use lithium\data\model\Query;
 
 class HttpTest extends \lithium\test\Unit {
@@ -28,19 +27,16 @@ class HttpTest extends \lithium\test\Unit {
 		'socket' => 'lithium\tests\mocks\data\source\http\adapter\MockSocket'
 	);
 
+	protected $_connectionConfig = array(
+		'methods' => array(
+			'something' => array('method' => 'get'),
+			'do' => array('method' => 'post')
+		)
+	);
+
 	public function setUp() {
-		$this->_configs = Connections::config();
-		Connections::reset();
-
-		Connections::config(array(
-			'mock-http-connection' => array('type' => 'Http')
-		));
-	}
-
-	public function tearDown() {
-		Connections::reset();
-		Connections::config($this->_configs);
-		unset($this->query);
+		$model = $this->_model;
+		$model::$connection = new Http($this->_connectionConfig);
 	}
 
 	public function testAllMethodsNoConnection() {
@@ -137,7 +133,7 @@ class HttpTest extends \lithium\test\Unit {
 
 	public function testCreateWithModel() {
 		$model = $this->_model;
-		$model::config(array('key' => 'id'));
+		$model::config(array('meta' => array('key' => 'id')));
 		$http = new Http($this->_testConfig);
 		$query = new Query(compact('model') + array('data' => array('title' => 'Test Title')));
 		$result = $http->create($query);
@@ -309,6 +305,28 @@ class HttpTest extends \lithium\test\Unit {
 		$result = $http->do($query);
 		$expected = join("\r\n", array(
 			'POST /do HTTP/1.1',
+			'Host: localhost:80',
+			'Connection: Close',
+			'User-Agent: Mozilla/5.0',
+			'Content-Type: application/x-www-form-urlencoded',
+			'Content-Length: 9',
+			'', 'title=sup'
+		));
+		$result = (string) $http->last->request;
+		$this->assertEqual($expected, $result);
+	}
+
+	public function testSendWithQueryObject() {
+		$http = new Http($this->_testConfig);
+		$query = new Query(array(
+			'model' => $this->_model,
+			'data' => array('title' => 'sup'),
+			'method' => 'post',
+			'path' => '/some/resource/path'
+		));
+		$result = $http->send($query);
+		$expected = join("\r\n", array(
+			'POST /some/resource/path HTTP/1.1',
 			'Host: localhost:80',
 			'Connection: Close',
 			'User-Agent: Mozilla/5.0',

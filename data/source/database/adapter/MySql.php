@@ -9,9 +9,7 @@
 namespace lithium\data\source\database\adapter;
 
 use PDO;
-use PDOStatement;
 use PDOException;
-use lithium\data\model\QueryException;
 
 /**
  * Extends the `Database` class to implement the necessary SQL-formatting and resultset-fetching
@@ -22,18 +20,6 @@ use lithium\data\model\QueryException;
  * @see lithium\data\source\database\adapter\MySql::__construct()
  */
 class MySql extends \lithium\data\source\Database {
-
-	/**
-	 * @var PDO
-	 */
-	public $connection;
-
-	protected $_classes = array(
-		'entity' => 'lithium\data\entity\Record',
-		'set' => 'lithium\data\collection\RecordSet',
-		'relationship' => 'lithium\data\model\Relationship',
-		'result' => 'lithium\data\source\database\adapter\my_sql\Result'
-	);
 
 	/**
 	 * MySQL column type definitions.
@@ -98,7 +84,7 @@ class MySql extends \lithium\data\source\Database {
 	 * Check for required PHP extension, or supported database feature.
 	 *
 	 * @param string $feature Test for support for a specific feature, i.e. `"transactions"` or
-	 *               `"arrays"`.
+	 *        `"arrays"`.
 	 * @return boolean Returns `true` if the particular feature (or if MySQL) support is enabled,
 	 *         otherwise `false`.
 	 */
@@ -122,50 +108,19 @@ class MySql extends \lithium\data\source\Database {
 	 *         `false`.
 	 */
 	public function connect() {
-		$config = $this->_config;
-		$this->_isConnected = false;
-		$host = $config['host'];
-
-		if (!$config['database']) {
-			return false;
-		}
-
-		$options = array(
-			PDO::ATTR_PERSISTENT => $config['persistent'],
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-		);
-
-		try {
+		if (!$this->_config['dsn']) {
+			$host = $this->_config['host'];
 			list($host, $port) = explode(':', $host) + array(1 => "3306");
-			$dsn = sprintf("mysql:host=%s;port=%s;dbname=%s", $host, $port, $config['database']);
-			$this->connection = new PDO($dsn, $config['login'], $config['password'], $options);
-		} catch (PDOException $e) {
-			return false;
+			$dsn = "mysql:host=%s;port=%s;dbname=%s";
+			$this->_config['dsn'] = sprintf($dsn, $host, $port, $this->_config['database']);
 		}
 
-		$this->_isConnected = true;
-
-		if ($config['encoding']) {
-			$this->encoding($config['encoding']);
+		if (!parent::connect()) {
+			return false;
 		}
 
 		$info = $this->connection->getAttribute(PDO::ATTR_SERVER_VERSION);
-
 		$this->_useAlias = (boolean) version_compare($info, "4.1", ">=");
-		return $this->_isConnected;
-	}
-
-	/**
-	 * Disconnects the adapter from the database.
-	 *
-	 * @return boolean True on success, else false.
-	 */
-	public function disconnect() {
-		if ($this->_isConnected) {
-			unset($this->connection);
-			$this->_isConnected = false;
-			return true;
-		}
 		return true;
 	}
 
@@ -201,6 +156,7 @@ class MySql extends \lithium\data\source\Database {
 	 * @param mixed $entity Specifies the table name for which the schema should be returned, or
 	 *        the class name of the model object requesting the schema, in which case the model
 	 *        class will be queried for the correct table name.
+	 * @param array $fields Any schema data pre-defined by the model.
 	 * @param array $meta
 	 * @return array Returns an associative array describing the given table's schema, where the
 	 *         array keys are the available fields, and the values are arrays describing each
@@ -208,11 +164,14 @@ class MySql extends \lithium\data\source\Database {
 	 *         - `'type'`: The field type name
 	 * @filter This method can be filtered.
 	 */
-	public function describe($entity, array $meta = array()) {
-		$params = compact('entity', 'meta');
+	public function describe($entity,  $fields = array(), array $meta = array()) {
+		$params = compact('entity', 'meta', 'fields');
 		return $this->_filter(__METHOD__, $params, function($self, $params) {
 			extract($params);
 
+			if ($fields) {
+				return $self->invokeMethod('_instance', array('schema', compact('fields')));
+			}
 			$name = $self->invokeMethod('_entityName', array($entity, array('quoted' => true)));
 			$columns = $self->read("DESCRIBE {$name}", array('return' => 'array', 'schema' => array(
 				'field', 'type', 'null', 'key', 'default', 'extra'
@@ -227,7 +186,7 @@ class MySql extends \lithium\data\source\Database {
 					'default'  => $column['default']
 				);
 			}
-			return $fields;
+			return $self->invokeMethod('_instance', array('schema', compact('fields')));
 		});
 	}
 
@@ -247,8 +206,9 @@ class MySql extends \lithium\data\source\Database {
 			return ($key = array_search($encoding, $encodingMap)) ? $key : $encoding;
 		}
 		$encoding = isset($encodingMap[$encoding]) ? $encodingMap[$encoding] : $encoding;
+
 		try {
-			$this->connection->exec("SET NAMES '$encoding'");
+			$this->connection->exec("SET NAMES '{$encoding}'");
 			return true;
 		} catch (PDOException $e) {
 			return false;
@@ -271,30 +231,6 @@ class MySql extends \lithium\data\source\Database {
 	}
 
 	/**
-	 * In cases where the query is a raw string (as opposed to a `Query` object), to database must
-	 * determine the correct column names from the result resource.
-	 *
-	 * @param mixed $query
-	 * @param resource $resource
-	 * @param object $context
-	 * @return array
-	 */
-	public function schema($query, $resource = null, $context = null) {
-		if (is_object($query)) {
-			return parent::schema($query, $resource, $context);
-		}
-
-		$result = array();
-		$count = $resource->resource()->columnCount();
-
-		for ($i = 0; $i < $count; $i++) {
-			$meta = $resource->resource()->getColumnMeta($i);
-			$result[] = $meta['name'];
-		}
-		return $result;
-	}
-
-	/**
 	 * Retrieves database error message and error code.
 	 *
 	 * @return array
@@ -303,7 +239,6 @@ class MySql extends \lithium\data\source\Database {
 		if ($error = $this->connection->errorInfo()) {
 			return array($error[1], $error[2]);
 		}
-		return null;
 	}
 
 	public function alias($alias, $context) {
@@ -349,29 +284,15 @@ class MySql extends \lithium\data\source\Database {
 		return $this->_filter(__METHOD__, $params, function($self, $params) use ($conn) {
 			$sql = $params['sql'];
 			$options = $params['options'];
-
 			$conn->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $options['buffered']);
 
-			if (!($resource = $conn->query($sql)) instanceof PDOStatement) {
-				list($code, $error) = $self->error();
-				throw new QueryException("{$sql}: {$error}", $code);
-			}
+			try {
+				$resource = $conn->query($sql);
+			} catch(PDOException $e) {
+				$self->invokeMethod('_error', array($sql));
+			};
 			return $self->invokeMethod('_instance', array('result', compact('resource')));
 		});
-	}
-
-	protected function _results($results) {
-		/* @var $results PDOStatement */
-		$numFields = $results->columnCount();
-		$index = $j = 0;
-
-		while ($j < $numFields) {
-			$column = $results->getColumnMeta($j);
-			$name = $column['name'];
-			$table = $column['table'];
-			$this->map[$index++] = empty($table) ? array(0, $name) : array($table, $name);
-			$j++;
-		}
 	}
 
 	/**

@@ -164,9 +164,9 @@ class FormTest extends \lithium\test\Unit {
 
 	public function testFormDataBinding() {
 		try {
-			MockFormPost::config(array('connection' => false));
+			MockFormPost::config(array('meta' => array('connection' => false)));
 		} catch (Exception $e) {
-			MockFormPost::config(array('connection' => false));
+			MockFormPost::config(array('meta' => array('connection' => false)));
 		}
 
 		$record = new Record(array('model' => $this->_model, 'data' => array(
@@ -278,10 +278,15 @@ class FormTest extends \lithium\test\Unit {
 	}
 
 	public function testFormInputField() {
+		$tag = array('input' => array('type' => 'file', 'name' => 'upload', 'id' => 'Upload'));
+
 		$result = $this->form->file('upload');
-		$this->assertTags($result, array('input' => array(
-			'type' => 'file', 'name' => 'upload', 'id' => 'Upload'
-		)));
+		$this->assertTags($result, $tag);
+
+		$value = new Document(array('model' => $this->_model));
+		$result = $this->form->file('upload', compact('value'));
+		$tag['input']['value'] = '';
+		$this->assertTags($result, $tag);
 	}
 
 	public function testHiddenFieldWithId() {
@@ -350,10 +355,10 @@ class FormTest extends \lithium\test\Unit {
 	}
 
 	public function testTextareaGeneration() {
-		$result = $this->form->textarea('foo', array('value' => 'some content'));
+		$result = $this->form->textarea('foo', array('value' => 'some content >'));
 		$this->assertTags($result, array(
 			'textarea' => array('name' => 'foo', 'id' => 'Foo'),
-			'some content',
+			'some content &gt;',
 			'/textarea'
 		));
 	}
@@ -611,8 +616,8 @@ class FormTest extends \lithium\test\Unit {
 
 		$result = $this->form->select(
 			'colors',
-			array('r' => 'red', 'g' => 'green', 'b' => 'blue'),
-			array('id' => 'Colors', 'value' => 'g')
+			array('r' => 'red', 'g "' => 'green', 'b' => 'blue'),
+			array('id' => 'Colors', 'value' => 'g "')
 		);
 
 		$this->assertTags($result, array(
@@ -620,7 +625,7 @@ class FormTest extends \lithium\test\Unit {
 			array('option' => array('value' => 'r')),
 			'red',
 			'/option',
-			array('option' => array('value' => 'g', 'selected' => 'selected')),
+			array('option' => array('value' => 'g &quot;', 'selected' => 'selected')),
 			'green',
 			'/option',
 			array('option' => array('value' => 'b')),

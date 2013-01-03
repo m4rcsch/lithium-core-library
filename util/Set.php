@@ -37,14 +37,19 @@ class Set {
 	 *         first.
 	 */
 	public static function append(array $array, array $array2) {
-		if (!$array && $array2) {
-			return $array2;
-		}
-		foreach ($array2 as $key => $value) {
-			if (!isset($array[$key])) {
-				$array[$key] = $value;
-			} elseif (is_array($value)) {
-				$array[$key] = static::append($array[$key], $array2[$key]);
+		$arrays = func_get_args();
+		$array = array_shift($arrays);
+		foreach ($arrays as $array2) {
+			if (!$array && $array2) {
+				$array = $array2;
+				continue;
+			}
+			foreach ($array2 as $key => $value) {
+				if (!array_key_exists($key, $array)) {
+					$array[$key] = $value;
+				} elseif (is_array($value)) {
+					$array[$key] = static::append($array[$key], $array2[$key]);
+				}
 			}
 		}
 		return $array;
@@ -291,16 +296,12 @@ class Set {
 					if (count($context['trace']) == 1) {
 						$context['trace'][] = $context['key'];
 					}
-					$parent = join('/', $context['trace']) . '/.';
+
+					array_pop($context['trace']);
+					$parent = join('/', $context['trace']);
 					$context['item'] = static::extract($data, $parent);
-					$context['key'] = array_pop($context['trace']);
-					if (isset($context['trace'][1]) && $context['trace'][1] > 0) {
-						$context['item'] = $context['item'][0];
-					} elseif (!empty($context['item'][$key])) {
-						$context['item'] = $context['item'][$key];
-					} else {
-						$context['item'] = array_shift($context['item']);
-					}
+					array_pop($context['trace']);
+					$context['item'] = array_shift($context['item']);
 					$matches[] = $context;
 					continue;
 				}
@@ -340,7 +341,7 @@ class Set {
 								array_unshift($tokens, $token);
 							}
 						} else {
-							$key = $token;
+							$ctext[] = $token;
 						}
 
 						$matches[] = array(
@@ -383,8 +384,10 @@ class Set {
 		$r = array();
 
 		foreach ($matches as $match) {
-			if ((!$options['flatten'] || is_array($match['item'])) && !is_int($match['key'])) {
-				$r[] = array($match['key'] => $match['item']);
+			$key = array_pop($match['trace']);
+			$condition = (!is_int($key) && $key !== null);
+			if ((!$options['flatten'] || is_array($match['item'])) && $condition) {
+				$r[] = array($key => $match['item']);
 			} else {
 				$r[] = $match['item'];
 			}
@@ -439,7 +442,9 @@ class Set {
 
 		foreach ($data as $key => $val) {
 			if (strpos($key, $options['separator']) === false) {
-				$result[$key] = $val;
+				if (!isset($result[$key])) {
+					$result[$key] = $val;
+				}
 				continue;
 			}
 			list($path, $key) = explode($options['separator'], $key, 2);
@@ -789,6 +794,25 @@ class Set {
 		}
 		return $sorted;
 	}
+
+	/**
+	 * Slices an array into two, separating them determined by an array of keys.
+	 *
+	 * Usage examples:
+	 *
+	 * {{{ embed:lithium\tests\cases\util\SetTest::testSetSlice(1-4) }}}
+	 *
+	 * @param array $subject Array that gets split apart
+	 * @param array|string $keys An array of keys or a single key as string
+	 * @return array An array containing both arrays, having the array with requested keys first and
+	 *         the remainder as second element
+	 */
+	public static function slice(array $data, $keys) {
+		$removed = array_intersect_key($data, array_fill_keys((array) $keys, true));
+		$data = array_diff_key($data, $removed);
+		return array($data, $removed);
+	}
+
 }
 
 ?>

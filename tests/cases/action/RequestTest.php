@@ -137,6 +137,12 @@ class RequestTest extends \lithium\test\Unit {
 
 		$request = new Request(array('env' => array(
 			'REMOTE_ADDR' => '123.456.789.000',
+			'HTTP_X_REAL_IP' => '111.222.333.444'
+		)));
+		$this->assertEqual('111.222.333.444', $request->env('REMOTE_ADDR'));
+
+		$request = new Request(array('env' => array(
+			'REMOTE_ADDR' => '123.456.789.000',
 			'HTTP_X_FORWARDED_FOR' => '111.222.333.444',
 			'HTTP_PC_REMOTE_ADDR' => '222.333.444.555'
 		)));
@@ -883,14 +889,27 @@ class RequestTest extends \lithium\test\Unit {
 	}
 
 	public function testAutomaticContentDecoding() {
-		$stream = fopen('php://temp', 'r+');
-		fwrite($stream, '{ "foo": "bar" }');
-		rewind($stream);
-		$request = new Request(compact('stream') + array('env' => array(
-			'CONTENT_TYPE' => 'application/json; charset=UTF-8',
-			'REQUEST_METHOD' => 'POST'
-		)));
-		$this->assertEqual(array('foo' => 'bar'), $request->data);
+		foreach (array('POST', 'PUT', 'PATCH') as $method) {
+			$stream = fopen('php://temp', 'r+');
+			fwrite($stream, '{ "foo": "bar" }');
+			rewind($stream);
+			$request = new Request(compact('stream') + array('env' => array(
+				'CONTENT_TYPE' => 'application/json; charset=UTF-8',
+				'REQUEST_METHOD' => $method
+			)));
+			$this->assertEqual(array('foo' => 'bar'), $request->data);
+		}
+
+		foreach (array('GET', 'HEAD', 'OPTIONS', 'DELETE') as $method) {
+			$stream = fopen('php://temp', 'r+');
+			fwrite($stream, '{ "foo": "bar" }');
+			rewind($stream);
+			$request = new Request(compact('stream') + array('env' => array(
+				'CONTENT_TYPE' => 'application/json; charset=UTF-8',
+				'REQUEST_METHOD' => $method
+			)));
+			$this->assertFalse($request->data);
+		}
 	}
 
 	public function testRequestTypeFromHeader() {
@@ -1075,6 +1094,18 @@ class RequestTest extends \lithium\test\Unit {
 		));
 		$expected = 'https://foo.com/the/base/path/posts?some=query&parameter=values';
 		$this->assertEqual($expected, $request->to('url'));
+	}
+
+	/**
+	 * Tests that the HTTP request method set by `Request` from the server information is not
+	 * overwritten in a parent class.
+	 */
+	public function testRequesMethodConfiguration() {
+		$request = new Request(array('env' => array('REQUEST_METHOD' => 'POST')));
+		$this->assertEqual('POST', $request->method);
+
+		$request = new Request(array('env' => array('REQUEST_METHOD' => 'PATCH')));
+		$this->assertEqual('PATCH', $request->method);
 	}
 }
 

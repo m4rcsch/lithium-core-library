@@ -9,7 +9,6 @@
 namespace lithium\tests\cases\data\source\http\adapter;
 
 use lithium\data\model\Query;
-use lithium\data\Connections;
 use lithium\data\entity\Document;
 use lithium\data\source\http\adapter\CouchDb;
 
@@ -17,7 +16,7 @@ class CouchDbTest extends \lithium\test\Unit {
 
 	public $db;
 
-	protected $_configs = array();
+	public $query;
 
 	protected $_testConfig = array(
 		'database' => 'lithium-test',
@@ -34,24 +33,14 @@ class CouchDbTest extends \lithium\test\Unit {
 	protected $_model = 'lithium\tests\mocks\data\source\http\adapter\MockCouchPost';
 
 	public function setUp() {
-		$this->_configs = Connections::config();
-
-		Connections::reset();
 		$this->db = new CouchDb(array('socket' => false));
-
-		Connections::config(array(
-			'mock-couchdb-connection' => array('object' => &$this->db, 'adapter' => 'CouchDb')
-		));
-
 		$model = $this->_model;
-		$entity = new Document(compact('model'));
-		$this->query = new Query(compact('model', 'entity'));
-	}
+		$model::resetSchema();
+		$model::$connection = $this->db;
 
-	public function tearDown() {
-		Connections::reset();
-		Connections::config($this->_configs);
-		unset($this->query);
+		$entity = new Document(compact('model'));
+		$type = 'create';
+		$this->query = new Query(compact('model', 'entity', 'type'));
 	}
 
 	public function testAllMethodsNoConnection() {
@@ -84,7 +73,7 @@ class CouchDbTest extends \lithium\test\Unit {
 
 	public function testDescribe() {
 		$couchdb = new CouchDb($this->_testConfig);
-		$this->assertNull($couchdb->describe('companies'));
+		$this->assertTrue(is_object($couchdb->describe('companies')));
 	}
 
 	public function testItem() {
@@ -174,9 +163,11 @@ class CouchDbTest extends \lithium\test\Unit {
 		$result = $couchdb->read($this->query);
 		$this->assertEqual(array('total_rows' => 3, 'offset' => 0), $result->stats());
 
-		$expected = array('id'=> 'a1', 'rev' => '1-1', 'author' => 'author 1', 'body' => 'body 1');
+		$expected = array(
+			'id' => 'a1', 'rev' => '1-1', 'author' => 'author 1', 'body' => 'body 1'
+		);
 		$result = $result->data();
-		$this->assertEqual($expected, $result[0]);
+		$this->assertEqual($expected, $result['a1']);
 
 		$expected = '/lithium-test/_design/latest/_view/all/';
 		$result = $couchdb->last->request->path;

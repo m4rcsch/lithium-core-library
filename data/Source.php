@@ -153,13 +153,15 @@ abstract class Source extends \lithium\core\Object {
 	 * @param mixed $entity Specifies the table name for which the schema should be returned, or
 	 *        the class name of the model object requesting the schema, in which case the model
 	 *        class will be queried for the correct table name.
-	 * @param array $meta
-	 * @return array Returns an associative array describing the given table's schema, where the
+	 * @param array $schema
+	 * @param array $meta The meta-information for the model class, which this method may use in
+	 *        introspecting the schema.
+	 * @return array Returns a `Schema` object describing the given model's schema, where the
 	 *         array keys are the available fields, and the values are arrays describing each
 	 *         field, containing the following keys:
 	 *         - `'type'`: The field type name
 	 */
-	abstract public function describe($entity, array $meta = array());
+	abstract public function describe($entity, $schema = array(), array $meta = array());
 
 	/**
 	 * Defines or modifies the default settings of a relationship between two models.
@@ -173,10 +175,19 @@ abstract class Source extends \lithium\core\Object {
 	abstract public function relationship($class, $type, $name, array $options = array());
 
 	/**
-	 * Abstract. Must be defined by child classes.
+	 * Create a record. This is the abstract method that is implemented by specific data sources.
+	 * This method should take a query object and use it to create a record in the data source.
 	 *
-	 * @param mixed $query
-	 * @param array $options
+	 * @param mixed $query An object which defines the update operation(s) that should be performed
+	 *        against the data store.  This can be a `Query`, a `RecordSet`, a `Record`, or a
+	 *        subclass of one of the three. Alternatively, `$query` can be an adapter-specific
+	 *        query string.
+	 * @param array $options The options from Model include,
+	 *              - `validate` _boolean_ default: true
+	 *              - `events` _string_ default: create
+	 *              - `whitelist` _array_ default: null
+	 *              - `callbacks` _boolean_ default: true
+	 *              - `locked` _boolean_ default: true
 	 * @return boolean Returns true if the operation was a success, otherwise false.
 	 */
 	abstract public function create($query, array $options = array());
@@ -255,10 +266,7 @@ abstract class Source extends \lithium\core\Object {
 	 *         dependencies.
 	 */
 	public function configureClass($class) {
-		return array('meta' => array(
-			'key' => 'id',
-			'locked' => true
-		));
+		return array('meta' => array('key' => 'id', 'locked' => true));
 	}
 
 	/**
@@ -280,6 +288,14 @@ abstract class Source extends \lithium\core\Object {
 		unset($options['class']);
 		return $this->_instance($class, compact('model', 'data') + $options);
 	}
+
+	/**
+	 * Applying a strategy to a `lithium\data\model\Query` object
+	 *
+	 * @param array $options The option array
+	 * @param object $context A query object to configure
+	 */
+	public function applyStrategy($options, $context) {}
 }
 
 ?>

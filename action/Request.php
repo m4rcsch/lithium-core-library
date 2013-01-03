@@ -182,16 +182,15 @@ class Request extends \lithium\net\http\Request {
 		if (!empty($this->_env['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
 			$this->_env['REQUEST_METHOD'] = $this->_env['HTTP_X_HTTP_METHOD_OVERRIDE'];
 		}
-		$type = $this->type($this->_env['CONTENT_TYPE']);
+		$type = $this->type($this->_config['type'] ?: $this->env('CONTENT_TYPE'));
 		$this->method = $method = strtoupper($this->_env['REQUEST_METHOD']);
+		$hasBody = in_array($method, array('POST', 'PUT', 'PATCH'));
 
-		if (!$this->data && ($method == 'POST' || $method == 'PUT')) {
-			if ($type !== 'html') {
-				$this->_stream = $this->_stream ?: fopen('php://input', 'r');
-				$media = $this->_classes['media'];
-				$this->data = (array) $media::decode($type, stream_get_contents($this->_stream));
-				fclose($this->_stream);
-			}
+		if (!$this->data && $hasBody && $type !== 'html') {
+			$this->_stream = $this->_stream ?: fopen('php://input', 'r');
+			$media = $this->_classes['media'];
+			$this->data = (array) $media::decode($type, stream_get_contents($this->_stream));
+			fclose($this->_stream);
 		}
 		$this->data = Set::merge((array) $this->data, $this->_parseFiles());
 	}
@@ -246,7 +245,7 @@ class Request extends \lithium\net\http\Request {
 		$this->_env[$key] = $val;
 
 		if ($key == 'REMOTE_ADDR') {
-			foreach (array('HTTP_X_FORWARDED_FOR', 'HTTP_PC_REMOTE_ADDR') as $altKey) {
+			foreach (array('HTTP_X_FORWARDED_FOR', 'HTTP_PC_REMOTE_ADDR', 'HTTP_X_REAL_IP') as $altKey) {
 				if ($addr = $this->env($altKey)) {
 					$val = $addr;
 					break;
@@ -461,8 +460,8 @@ class Request extends \lithium\net\http\Request {
 	 *         on the content type of the request.
 	 */
 	public function type($type = null) {
-		if ($type === null) {
-			$type = $this->type ?: $this->env('CONTENT_TYPE');
+		if (!$type && !empty($this->params['type'])) {
+			$type = $this->params['type'];
 		}
 		return parent::type($type);
 	}

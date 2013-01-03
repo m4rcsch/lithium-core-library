@@ -8,12 +8,13 @@
 
 namespace lithium\tests\mocks\data\model;
 
-class MockQueryComment extends \lithium\data\Model {
+class MockQueryComment extends \lithium\tests\mocks\data\MockBase {
 
-	protected $_meta = array(
-		'source' => false,
-		'connection' => 'mock-database-connection'
-	);
+	public static $connection = null;
+
+	public $belongsTo = array('MockQueryPost');
+
+	protected $_meta = array('source' => false, 'connection' => false);
 
 	protected $_schema = array(
 		'id' => array('type' => 'integer', 'key' => 'primary'),
