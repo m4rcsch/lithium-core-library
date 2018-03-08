@@ -1,9 +1,10 @@
 <?php
 /**
- * Lithium: the most rad php framework
+ * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * @copyright     Copyright 2015, Union of RAD (http://union-of-rad.org)
- * @license       http://opensource.org/licenses/bsd-license.php The BSD License
+ * Copyright 2016, Union of RAD. All rights reserved. This source
+ * code is distributed under the terms of the BSD 3-Clause License.
+ * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\net\http;
@@ -13,16 +14,19 @@ namespace lithium\net\http;
  * order to determine the correct controller and action that an HTTP request should be dispatched
  * to.
  *
- * Typically, `Route` objects are created and handled through the `lithium\net\http\Router` class,
- * as follows:
+ * Typically, `Route` objects are created and handled through the `Router` class, as follows.
+ * When connecting a route, a `Route` object is instantiated behind the scenes, and added
+ * to the `Router`'s collection.
  *
  * ```
- * // This instantiates a Route object behind the scenes, and adds it to Router's collection:
  * Router::connect("/{:controller}/{:action}");
+ * ```
  *
- * // This matches a set of parameters against all Route objects contained in Router, and if a match
- * // is found, returns a string URL with parameters inserted into the URL pattern:
- * Router::match(array("controller" => "users", "action" => "login")); // returns "/users/login"
+ * This following matches a set of parameters against all `Route` objects contained in Router, and
+ * if a match is found, returns a string URL with parameters inserted into the URL pattern.
+ *
+ * ```
+ * Router::match(["controller" => "users", "action" => "login"]); // returns "/users/login"
  * ```
  *
  * For more advanced routing, however, you can directly instantiate a `Route` object, a subclass,
@@ -31,21 +35,18 @@ namespace lithium\net\http;
  * incoming URLs than it generates.
  *
  * ```
- * $route = new Route(array(
+ * $route = new Route([
  *        'template' => '/users/{:user}',
  *        'pattern' => '@^/u(?:sers)?(?:/(?P<user>[^\/]+))$@',
- *        'params' => array('controller' => 'users', 'action' => 'index'),
- *        'match' => array('controller' => 'users', 'action' => 'index'),
- *        'defaults' => array('controller' => 'users'),
- *        'keys' => array('user' => 'user'),
- *        'options' => array('compile' => false, 'wrap' => false)
- * ));
+ *        'params' => ['controller' => 'users', 'action' => 'index'],
+ *        'match' => ['controller' => 'users', 'action' => 'index'],
+ *        'defaults' => ['controller' => 'users'],
+ *        'keys' => ['user' => 'user'],
+ *        'options' => ['compile' => false, 'wrap' => false]
+ * ]);
+ *
  * Router::connect($route); // this will match '/users/<username>' or '/u/<username>'.
  * ```
- *
- * For additional information on the `'options'` constructor key, see
- * `lithium\net\http\Route::compile()`. To learn more about Lithium's routing system, see
- * `lithium\net\http\Router`.
  *
  * @see lithium\net\http\Route::compile()
  * @see lithium\net\http\Router
@@ -53,13 +54,16 @@ namespace lithium\net\http;
 class Route extends \lithium\core\Object {
 
 	/**
-	 * The URL template string that the route matches.
+	 * The URL template string that the route matches, i.e.
+	 * `'/admin/{:controller}/{:id:\d+}/{:args}'`.
 	 *
-	 * This string can contain fixed elements, i.e. `"/admin"`, capture elements,
-	 * i.e. `"/{:controller}"`, capture elements optionally paired with regular expressions or
-	 * named regular expression patterns, i.e. `"/{:id:\d+}"` or `"/{:id:ID}"`, the special wildcard
-	 * capture, i.e. `"{:args}"`, or any combination thereof, i.e.
-	 * `"/admin/{:controller}/{:id:\d+}/{:args}"`.
+	 * This string can contain any combination of...
+	 *
+	 * 1. fixed elements, i.e. `'/admin'`
+	 * 2. plain capture elements, i.e. `'/{:controller}'`
+	 * 3. capture elements paired with regular expressions, i.e. `'/{:id:\d+}'`
+	 * 4. capture elements paired with named regular expression patterns, `'/{:id:ID}'`
+	 * 5. the speciall wildcard capture element `'{:args}'`
 	 *
 	 * @var string
 	 */
@@ -68,7 +72,7 @@ class Route extends \lithium\core\Object {
 	/**
 	 * The regular expression used to match URLs.
 	 *
-	 * This regular expression is typically 'compiled' down from the higher-level syntax used in
+	 * This regular expression is typically _compiled_ down from the higher-level syntax used in
 	 * `$_template`, but can be set manually with compilation turned off in the constructor for
 	 * extra control or if you are using pre-compiled `Route` objects.
 	 *
@@ -79,12 +83,12 @@ class Route extends \lithium\core\Object {
 	protected $_pattern = '';
 
 	/**
-	 * An array of route parameter names (i.e. {:foo}) that appear in the URL template.
+	 * An array of route parameter names (i.e. `{:foo}`) that appear in the URL template.
 	 *
 	 * @var array
 	 * @see lithium\net\http\Route::$_template
 	 */
-	protected $_keys = array();
+	protected $_keys = [];
 
 	/**
 	 * An array of key/value pairs representing the parameters of the route. For keys which match
@@ -95,7 +99,7 @@ class Route extends \lithium\core\Object {
 	 *
 	 * @var array
 	 */
-	protected $_params = array();
+	protected $_params = [];
 
 	/**
 	 * The array of values that appear in the second parameter of `Router::connect()`, which are
@@ -104,7 +108,7 @@ class Route extends \lithium\core\Object {
 	 *
 	 * @var array
 	 */
-	protected $_match = array();
+	protected $_match = [];
 
 	/**
 	 * An array of metadata parameters which must be present in the request in order for the route
@@ -112,7 +116,7 @@ class Route extends \lithium\core\Object {
 	 *
 	 * @var array
 	 */
-	protected $_meta = array();
+	protected $_meta = [];
 
 	/**
 	 * The default values for the keys present in the URL template.
@@ -121,14 +125,14 @@ class Route extends \lithium\core\Object {
 	 * @see lithium\net\http\Route::$_template
 	 * @see lithium\net\http\Route::$_keys
 	 */
-	protected $_defaults = array();
+	protected $_defaults = [];
 
 	/**
 	 * An array of regular expression patterns used in route matching.
 	 *
 	 * @var array
 	 */
-	protected $_subPatterns = array();
+	protected $_subPatterns = [];
 
 	/**
 	 * An array of parameter names which will persist by default when generating URLs. By default,
@@ -138,7 +142,7 @@ class Route extends \lithium\core\Object {
 	 *
 	 * @var array
 	 */
-	protected $_persist = array();
+	protected $_persist = [];
 
 	/**
 	 * Contains a function which will be executed if this route is matched. The function takes the
@@ -148,15 +152,15 @@ class Route extends \lithium\core\Object {
 	 * handle redirects, or simple API services.
 	 *
 	 * ```
-	 * new Route(array(
+	 * new Route([
 	 *     'template' => '/photos/{:id:[0-9]+}.jpg',
 	 *     'handler' => function($request) {
-	 *         return new Response(array(
-	 *             'headers' => array('Content-type' => 'image/jpeg'),
+	 *         return new Response([
+	 *             'headers' => ['Content-type' => 'image/jpeg'],
 	 *             'body' => Photos::first($request->id)->bytes()
-	 *         ));
+	 *         ]);
 	 *     }
-	 * });
+	 * }];
 	 * ```
 	 *
 	 * @see lithium\net\http\Route::parse()
@@ -171,7 +175,7 @@ class Route extends \lithium\core\Object {
 	 * @see lithium\net\http\Router::formatters()
 	 * @var array
 	 */
-	protected $_formatters = array();
+	protected $_formatters = [];
 
 	/**
 	 * Auto configuration properties. Also used as the list of properties to return when exporting
@@ -180,10 +184,10 @@ class Route extends \lithium\core\Object {
 	 * @see lithium\net\http\Route::export()
 	 * @var array
 	 */
-	protected $_autoConfig = array(
+	protected $_autoConfig = [
 		'template', 'pattern', 'params', 'match', 'meta',
 		'keys', 'defaults', 'subPatterns', 'persist', 'handler'
-	);
+	];
 
 	/**
 	 * Constructor.
@@ -204,36 +208,36 @@ class Route extends \lithium\core\Object {
 	 *         - `'unicode'` _boolean_
 	 * @return void
 	 */
-	public function __construct(array $config = array()) {
-		$defaults = array(
-			'params'   => array(),
+	public function __construct(array $config = []) {
+		$defaults = [
+			'params'   => [],
 			'template' => '/',
 			'pattern'  => '',
-			'match'    => array(),
-			'meta'     => array(),
-			'defaults' => array(),
-			'keys'     => array(),
-			'persist'  => array(),
+			'match'    => [],
+			'meta'     => [],
+			'defaults' => [],
+			'keys'     => [],
+			'persist'  => [],
 			'handler'  => null,
 			'continue' => false,
-			'modifiers' => array(),
-			'formatters' => array(),
+			'modifiers' => [],
+			'formatters' => [],
 			'unicode'  => true
-		);
+		];
 		parent::__construct($config + $defaults);
 	}
 
 	protected function _init() {
 		parent::_init();
 
-		if (!$this->_config['continue'] && !preg_match('@{:action:.*?}@', $this->_template)) {
-			$this->_params += array('action' => 'index');
+		if (!$this->_config['continue'] && strpos($this->_template, '{:action:') === false) {
+			$this->_params += ['action' => 'index'];
 		}
 		if (!$this->_pattern) {
 			$this->compile();
 		}
 		if (isset($this->_keys['controller']) || isset($this->_params['controller'])) {
-			$this->_persist = $this->_persist ?: array('controller');
+			$this->_persist = $this->_persist ?: ['controller'];
 		}
 	}
 
@@ -254,8 +258,8 @@ class Route extends \lithium\core\Object {
 	 *         a route handler function was used, returns the result of its invocation. Returns
 	 *         `false` if the route never matched.
 	 */
-	public function parse($request, array $options = array()) {
-		$defaults = array('url' => $request->url);
+	public function parse($request, array $options = []) {
+		$defaults = ['url' => $request->url];
 		$options += $defaults;
 		$url = '/' . trim($options['url'], '/');
 		$pattern = $this->_pattern;
@@ -276,7 +280,7 @@ class Route extends \lithium\core\Object {
 			}
 		}
 
-		$result = array_intersect_key($match + array('args' => array()), $this->_keys);
+		$result = array_intersect_key($match + ['args' => []], $this->_keys);
 		foreach ($result as $key => $value) {
 			if ($value === '') {
 				unset($result[$key]);
@@ -297,11 +301,11 @@ class Route extends \lithium\core\Object {
 	 * Matches a set of parameters against the route, and returns a URL string
 	 * if the route matches the parameters.
 	 *
-	 * @param array $options
+	 * @param array $options An array of parameters.
 	 * @return string|boolean URL string on success, else `false` if the route didn't match.
 	 */
-	public function match(array $options = array()) {
-		$defaults = array('action' => 'index', 'http:method' => 'GET');
+	public function match(array $options = []) {
+		$defaults = ['action' => 'index', 'http:method' => 'GET'];
 		$query = null;
 
 		if (!$this->_config['continue']) {
@@ -332,9 +336,9 @@ class Route extends \lithium\core\Object {
 		$defaults = $this->_defaults + $defaults;
 
 		if ($this->_config['continue']) {
-			return $this->_write(array('args' => '{:args}') + $options, $this->_defaults);
+			return $this->_write(['args' => '{:args}'] + $options, $this->_defaults);
 		}
-		return $this->_write($options, $defaults + array('args' => '')) . $query;
+		return $this->_write($options, $defaults + ['args' => '']) . $query;
 	}
 
 	/**
@@ -378,11 +382,11 @@ class Route extends \lithium\core\Object {
 	 *         failure, returns `false`.
 	 */
 	protected function _matchKeys($options) {
-		$args = array('args' => 'args');
+		$args = ['args' => 'args'];
 
-		$scope = array();
+		$scope = [];
 		if (!empty($options['scope'])) {
-			$scope = (array) $options['scope'] + array('params' => array());
+			$scope = (array) $options['scope'] + ['params' => []];
 			$scope = array_flip($scope['params']);
 		}
 		unset($options['scope']);
@@ -422,7 +426,7 @@ class Route extends \lithium\core\Object {
 	protected function _write($options, $defaults) {
 		$template = $this->_template;
 		$trimmed = true;
-		$options += array('args' => '');
+		$options += ['args' => ''];
 
 		foreach (array_reverse($this->_keys, true) as $key) {
 			$value =& $options[$key];
@@ -456,7 +460,7 @@ class Route extends \lithium\core\Object {
 	 *         and parameter lists.
 	 */
 	public function export() {
-		$result = array();
+		$result = [];
 
 		foreach ($this->_autoConfig as $key) {
 			if ($key === 'formatters') {
@@ -503,7 +507,7 @@ class Route extends \lithium\core\Object {
 		$params = $m[2];
 		$regexs = $m[3];
 		unset($m);
-		$this->_keys = array();
+		$this->_keys = [];
 
 		foreach ($params as $i => $param) {
 			$this->_keys[$param] = $param;
