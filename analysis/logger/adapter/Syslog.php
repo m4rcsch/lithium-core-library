@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -15,7 +15,7 @@ namespace lithium\analysis\logger\adapter;
  *
  * @see lithium\analysis\logger\adapter\Syslog::__construct()
  */
-class Syslog extends \lithium\core\Object {
+class Syslog extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * Flag indicating whether or not the connection to `syslogd` has been opened yet.

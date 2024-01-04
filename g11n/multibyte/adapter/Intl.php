@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2012, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -20,7 +20,7 @@ namespace lithium\g11n\multibyte\adapter;
  *
  * @link http://php.net/book.intl.php
  */
-class Intl extends \lithium\core\Object {
+class Intl extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * Determines if this adapter is enabled by checking if the `intl` extension is loaded.

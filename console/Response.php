@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -16,7 +16,7 @@ use lithium\util\Text;
  * resources for writing output and errors, as well as shell coloring information, and the response
  * status code for the currently-executing command.
  */
-class Response extends \lithium\core\Object {
+class Response extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * Output stream, STDOUT

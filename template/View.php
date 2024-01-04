@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -76,7 +76,7 @@ use lithium\template\TemplateException;
  * @see lithium\template\view\adapter
  * @see lithium\net\http\Media
  */
-class View extends \lithium\core\Object {
+class View extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * Output filters for view rendering.
@@ -446,11 +446,14 @@ class View extends \lithium\core\Object {
 		return $result;
 	}
 
+	/* Deprecated / BC */
+
 	/**
 	 * Handles API backward compatibility by converting an array-based rendering instruction passed
 	 * to `render()` as a process, to a set of rendering steps, rewriting any associated rendering
 	 * parameters as necessary.
 	 *
+	 * @deprecated
 	 * @param array $command A deprecated rendering instruction, i.e.
 	 *              `array('template' => '/path/to/template')`.
 	 * @param array $params The array of associated rendering parameters, passed by reference.
@@ -459,6 +462,11 @@ class View extends \lithium\core\Object {
 	 * @return array Returns a converted set of rendering steps, to be executed in `render()`.
 	 */
 	protected function _convertSteps(array $command, array &$params, $defaults) {
+		$message  = "Deprecated rendering instructions (`['template' => '/path/to/tmpl']`) found. ";
+		$message .= "Please use long syntax (`['template' => ['path' => '/path/to/tmpl']]`). ";
+		$message .= "Rendering instruction was: " . var_export($command, true);
+		trigger_error($message, E_USER_DEPRECATED);
+
 		if (count($command) === 1) {
 			$params['template'] = current($command);
 			return [['path' => key($command)] + $defaults];

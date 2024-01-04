@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -15,7 +15,7 @@ namespace lithium\console;
  *
  * @see lithium\console\Dispatcher
  */
-class Request extends \lithium\core\Object {
+class Request extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * The raw data passed from the command line

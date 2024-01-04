@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -24,7 +24,7 @@ use lithium\util\Inflector;
  * Subclasses may implement any other non-standard functionality, but the above methods define the
  * requirements for interacting with `Model` objects, and other classes within `lithium\data`.
  */
-abstract class Source extends \lithium\core\Object {
+abstract class Source extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * The list of object properties to be automatically assigned from configuration passed to

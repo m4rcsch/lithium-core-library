@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -23,7 +23,7 @@ use lithium\aop\Filters;
  * Using a series of cascading rules and handlers, it is possible to capture and handle very
  * specific errors and exceptions.
  */
-class ErrorHandler extends \lithium\core\StaticObject {
+class ErrorHandler extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * Configuration parameters.
@@ -96,7 +96,7 @@ class ErrorHandler extends \lithium\core\StaticObject {
 		$trap = function($code, $message, $file, $line = 0, $context = null) {
 			$trace = debug_backtrace();
 			$trace = array_slice($trace, 1, count($trace));
-			static::handle(compact('type', 'code', 'message', 'file', 'line', 'trace', 'context'));
+			static::handle(compact('code', 'message', 'file', 'line', 'trace', 'context'));
 		};
 
 		$convert = function($code, $message, $file, $line = 0, $context = null) {
@@ -294,6 +294,16 @@ class ErrorHandler extends \lithium\core\StaticObject {
 			}
 		}
 		return $result;
+	}
+
+	/**
+	 * Exit immediately. Primarily used for overrides during testing.
+	 *
+	 * @param integer|string $status integer range 0 to 254, string printed on exit
+	 * @return void
+	 */
+	protected static function _stop($status = 0) {
+		exit($status);
 	}
 }
 

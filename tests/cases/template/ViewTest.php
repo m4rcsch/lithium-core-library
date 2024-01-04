@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -82,12 +82,6 @@ class ViewTest extends \lithium\test\Unit {
 			'template' => 'Hello {:content}!'
 		]);
 		$expected = 'Hello world!';
-		$this->assertEqual($expected, $result);
-
-		$result = $view->render(['element' => 'Logged in as: {:name}.'], [
-			'name' => "Cap'n Crunch"
-		]);
-		$expected = "Logged in as: Cap'n Crunch.";
 		$this->assertEqual($expected, $result);
 
 		$result = $view->render('element', ['name' => "Cap'n Crunch"], [
@@ -275,6 +269,25 @@ class ViewTest extends \lithium\test\Unit {
 		Libraries::remove('test_app');
 		Libraries::remove('test_app2');
 		$this->_cleanUp();
+	}
+
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
+	public function testDeprecatedBasicRenderModes() {
+		error_reporting(($original = error_reporting()) & ~E_USER_DEPRECATED);
+
+		$view = new View(['loader' => 'Simple', 'renderer' => 'Simple']);
+
+		$result = $view->render(['element' => 'Logged in as: {:name}.'], [
+			'name' => "Cap'n Crunch"
+		]);
+		$expected = "Logged in as: Cap'n Crunch.";
+		$this->assertEqual($expected, $result);
+
+		error_reporting($original);
 	}
 }
 

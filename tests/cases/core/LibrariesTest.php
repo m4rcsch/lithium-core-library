@@ -2,19 +2,19 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\tests\cases\core;
 
-use stdClass;
-use SplFileInfo;
 use Phar;
-use lithium\util\Inflector;
+use SplFileInfo;
 use lithium\core\Libraries;
 use lithium\tests\mocks\core\MockInitMethod;
+use lithium\util\Inflector;
+use stdClass;
 
 class LibrariesTest extends \lithium\test\Unit {
 
@@ -671,7 +671,19 @@ EOD;
 		unlink($file);
 	}
 
-	public function testClassInstanceWithSubnamespace() {
+	public function testInstanceWithClasses() {
+		$result = Libraries::instance(null, 'view', [], [
+			'view' => 'lithium\template\view\adapter\Simple'
+		]);
+		$this->assertInstanceOf('lithium\template\view\adapter\Simple', $result);
+	}
+
+	public function testInstanceWithObject() {
+		$result = Libraries::instance(null, new stdClass());
+		$this->assertInstanceOf('stdClass', $result);
+	}
+
+	public function testInstanceWithSubnamespace() {
 		$testApp = Libraries::get(true, 'resources') . '/tmp/tests/test_app';
 		mkdir($testApp);
 		$paths = ["/controllers", "/controllers/admin"];
@@ -801,14 +813,14 @@ EOD;
 			],
 		]);
 
-		$analysis = list($docblock, $debugger) = Libraries::locate('analysis', null, [
+		$analysis = Libraries::locate('analysis', null, [
 			'recursive' => false,
 			'format' => false,
 		]);
+		sort($analysis);
 
-		$this->assertCount(2, $analysis);
-		$this->assertPattern('/Docblock\.php/', $docblock);
-		$this->assertPattern('/Debugger\.php/', $debugger);
+		$this->assertPattern('/Debugger\.php/', $analysis[0]);
+		$this->assertPattern('/Docblock\.php/', $analysis[1]);
 
 		error_reporting($original);
 	}

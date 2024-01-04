@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -28,7 +28,7 @@ class InspectorTest extends \lithium\test\Unit {
 	 */
 	public function testBasicMethodInspection() {
 		$class = 'lithium\analysis\Debugger';
-		$parent = 'lithium\core\StaticObject';
+		$parent = 'lithium\core\StaticObjectDeprecated';
 
 		$expected = array_diff(get_class_methods($class), get_class_methods($parent));
 		$result = array_keys(Inspector::methods($class, 'extents'));
@@ -49,7 +49,7 @@ class InspectorTest extends \lithium\test\Unit {
 		$result = Inspector::methods($this, null);
 		$this->assertInstanceOf('ReflectionMethod', $result[0]);
 
-		$result = Inspector::info('lithium\core\Object::_init()');
+		$result = Inspector::info('lithium\core\ObjectDeprecated::_init()');
 		$expected = '_init';
 		$this->assertEqual($expected, $result['name']);
 
@@ -343,8 +343,12 @@ class InspectorTest extends \lithium\test\Unit {
 	/**
 	 * Tests that the correct parameters are always passed in `Inspector::invokeMethod()`,
 	 * regardless of the number.
+	 *
+	 * @deprecated
 	 */
 	public function testMethodInvocationWithParameters() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$class = 'lithium\tests\mocks\analysis\MockInspector';
 
 		$this->assertEqual($class::invokeMethod('foo'), []);
@@ -373,8 +377,9 @@ class InspectorTest extends \lithium\test\Unit {
 			'long', 'then', 'UR', 'DOIN', 'IT', 'RONG'
 		];
 		$this->assertEqual($class::invokeMethod('foo', $params), $params);
-	}
 
+		error_reporting($backup);
+	}
 }
 
 ?>

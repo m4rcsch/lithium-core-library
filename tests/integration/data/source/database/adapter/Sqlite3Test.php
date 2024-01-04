@@ -2,20 +2,21 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2013, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\tests\integration\data\source\database\adapter;
 
+use ReflectionMethod;
 use lithium\core\Libraries;
-use lithium\data\Schema;
 use lithium\data\Connections;
+use lithium\data\Schema;
 use lithium\data\model\Query;
 use lithium\data\source\database\adapter\Sqlite3;
-use lithium\tests\mocks\data\source\database\adapter\MockSqlite3;
 use lithium\tests\fixture\model\gallery\Galleries;
+use lithium\tests\mocks\data\source\database\adapter\MockSqlite3;
 
 class Sqlite3Test extends \lithium\tests\integration\data\Base {
 
@@ -149,25 +150,28 @@ class Sqlite3Test extends \lithium\tests\integration\data\Base {
 	}
 
 	public function testColumnAbstraction() {
-		$result = $this->_db->invokeMethod('_column', ['varchar']);
+		$method = new ReflectionMethod($this->_db, '_column');
+		$method->setAccessible(true);
+
+		$result = $method->invokeArgs($this->_db, ['varchar']);
 		$this->assertEqual(['type' => 'string', 'length' => 255], $result);
 
-		$result = $this->_db->invokeMethod('_column', ['tinyint(1)']);
+		$result = $method->invokeArgs($this->_db, ['tinyint(1)']);
 		$this->assertEqual(['type' => 'boolean'], $result);
 
-		$result = $this->_db->invokeMethod('_column', ['varchar(255)']);
+		$result = $method->invokeArgs($this->_db, ['varchar(255)']);
 		$this->assertEqual(['type' => 'string', 'length' => 255], $result);
 
-		$result = $this->_db->invokeMethod('_column', ['text']);
+		$result = $method->invokeArgs($this->_db, ['text']);
 		$this->assertEqual(['type' => 'text'], $result);
 
-		$result = $this->_db->invokeMethod('_column', ['text']);
+		$result = $method->invokeArgs($this->_db, ['text']);
 		$this->assertEqual(['type' => 'text'], $result);
 
-		$result = $this->_db->invokeMethod('_column', ['decimal(12,2)']);
+		$result = $method->invokeArgs($this->_db, ['decimal(12,2)']);
 		$this->assertEqual(['type' => 'float', 'length' => 12, 'precision' => 2], $result);
 
-		$result = $this->_db->invokeMethod('_column', ['int(11)']);
+		$result = $method->invokeArgs($this->_db, ['int(11)']);
 		$this->assertEqual(['type' => 'integer', 'length' => 11], $result);
 	}
 

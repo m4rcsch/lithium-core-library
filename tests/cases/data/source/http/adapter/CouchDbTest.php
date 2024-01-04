@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -51,6 +51,7 @@ class CouchDbTest extends \lithium\test\Unit {
 		Connections::remove('mockconn');
 		MockCouchPost::reset();
 	}
+
 	public function testAllMethodsNoConnection() {
 		$this->assertNotEmpty($this->_db->connect());
 		$this->assertNotEmpty($this->_db->disconnect());
@@ -252,12 +253,20 @@ class CouchDbTest extends \lithium\test\Unit {
 		$this->assertEqual(CouchDb::enabled('relationships'), false);
 	}
 
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsTo() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$couchdb = new CouchDb($this->_testConfig);
 		$this->assertTrue($couchdb->respondsTo('foobarbaz'));
 		$this->assertFalse($couchdb->respondsTo(0));
-	}
 
+		error_reporting($backup);
+	}
 }
 
 ?>

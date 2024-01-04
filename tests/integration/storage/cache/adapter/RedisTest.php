@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -30,15 +30,9 @@ class RedisTest extends \lithium\test\Integration {
 
 	/**
 	 * Skip the test if the Redis extension is unavailable.
-	 *
-	 * @link https://github.com/facebook/hhvm/commit/34de1a279b3b66458ff980d12ef347022f2def04
 	 */
 	public function skip() {
 		$this->skipIf(!Redis::enabled(), 'The redis extension is not installed.');
-		$this->skipIf(
-			defined('HHVM_VERSION') && version_compare(HHVM_VERSION, '3.10', '<'),
-			'Cannot reliably run redis test on HHVM < 3.110 due to HHVM bug.'
-		);
 
 		$redis = new RedisCore();
 		$cfg = $this->_config;
@@ -112,7 +106,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->_redis->ttl($key);
 		$this->assertTrue($result == 5 || $result == 4);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 
 		$key = 'another_key';
@@ -132,7 +126,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->_redis->ttl($key);
 		$this->assertTrue($result == 60 || $result == 59);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 	}
 
@@ -153,7 +147,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->_redis->ttl($key);
 		$this->assertTrue($result == 5 || $result == 4);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 	}
 
@@ -169,13 +163,13 @@ class RedisTest extends \lithium\test\Integration {
 		$this->assertTrue($result);
 
 		$result = $this->_redis->exists($key);
-		$this->assertTrue($result);
+		$this->assertTrue((boolean) $result);
 
 		$expected = -1;
 		$result = $this->_redis->ttl($key);
 		$this->assertEqual($expected, $result);
 
-		$this->_redis->delete($key);
+		$this->_redis->del($key);
 
 		$redis = new Redis(['expiry' => Cache::PERSIST]);
 		$expiry = Cache::PERSIST;
@@ -184,13 +178,13 @@ class RedisTest extends \lithium\test\Integration {
 		$this->assertTrue($result);
 
 		$result = $this->_redis->exists($key);
-		$this->assertTrue($result);
+		$this->assertTrue((boolean) $result);
 
 		$expected = -1;
 		$result = $this->_redis->ttl($key);
 		$this->assertEqual($expected, $result);
 
-		$this->_redis->delete($key);
+		$this->_redis->del($key);
 
 		$redis = new Redis();
 		$expiry = Cache::PERSIST;
@@ -199,13 +193,13 @@ class RedisTest extends \lithium\test\Integration {
 		$this->assertTrue($result);
 
 		$result = $this->_redis->exists($key);
-		$this->assertTrue($result);
+		$this->assertTrue((boolean) $result);
 
 		$expected = -1;
 		$result = $this->_redis->ttl($key);
 		$this->assertEqual($expected, $result);
 
-		$this->_redis->delete($key);
+		$this->_redis->del($key);
 	}
 
 	public function testWriteExpiryExpires() {
@@ -214,9 +208,9 @@ class RedisTest extends \lithium\test\Integration {
 		$this->redis->write($keys, $expiry);
 
 		$result = $this->_redis->exists('key1');
-		$this->assertTrue($result);
+		$this->assertTrue((boolean) $result);
 
-		$this->_redis->delete('key1');
+		$this->_redis->del('key1');
 
 		$keys = ['key1' => 'data1'];
 		$expiry = '+1 second';
@@ -225,7 +219,7 @@ class RedisTest extends \lithium\test\Integration {
 		sleep(2);
 
 		$result = $this->_redis->exists('key1');
-		$this->assertFalse($result);
+		$this->assertFalse((boolean) $result);
 	}
 
 	public function testWriteExpiryTtl() {
@@ -234,9 +228,9 @@ class RedisTest extends \lithium\test\Integration {
 		$this->redis->write($keys, $expiry);
 
 		$result = $this->_redis->exists('key1');
-		$this->assertTrue($result);
+		$this->assertTrue((boolean) $result);
 
-		$this->_redis->delete('key1');
+		$this->_redis->del('key1');
 
 		$keys = ['key1' => 'data1'];
 		$expiry = 1;
@@ -245,7 +239,7 @@ class RedisTest extends \lithium\test\Integration {
 		sleep(2);
 
 		$result = $this->_redis->exists('key1');
-		$this->assertFalse($result);
+		$this->assertFalse((boolean) $result);
 	}
 
 	public function testWriteWithScope() {
@@ -275,7 +269,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->redis->read($keys);
 		$this->assertEqual($expected, $result);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 
 		$key = 'another_read_key';
@@ -295,7 +289,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->redis->read($keys);
 		$this->assertEqual($expected, $result);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 	}
 
@@ -309,7 +303,7 @@ class RedisTest extends \lithium\test\Integration {
 		$this->assertEqual($expected, $result);
 
 		foreach ($data as $k => $v) {
-			$result = $this->_redis->delete($k);
+			$result = $this->_redis->del($k);
 			$this->assertEqual(1, $result);
 		}
 	}
@@ -322,7 +316,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->redis->write($keys, $expiry);
 		$this->assertTrue($result);
 
-		$result = $this->_redis->getMultiple(array_keys($keys));
+		$result = $this->_redis->mGet(array_keys($keys));
 		$expected = array_values($keys);
 		$this->assertEqual($expected, $result);
 	}
@@ -394,7 +388,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->redis->delete($keys);
 		$this->assertTrue($result);
 
-		$this->assertEqual(0, $this->_redis->delete($key));
+		$this->assertEqual(0, $this->_redis->del($key));
 	}
 
 	public function testDeleteNonExistentKey() {
@@ -474,7 +468,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->_redis->get($key);
 		$this->assertEqual($value - 1, $result);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 	}
 
@@ -491,7 +485,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->_redis->get($key);
 		$this->assertEqual($value, $result);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 	}
 
@@ -525,7 +519,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->_redis->get($key);
 		$this->assertEqual($value + 1, $result);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 	}
 
@@ -542,7 +536,7 @@ class RedisTest extends \lithium\test\Integration {
 		$result = $this->_redis->get($key);
 		$this->assertEqual($value, $result);
 
-		$result = $this->_redis->delete($key);
+		$result = $this->_redis->del($key);
 		$this->assertEqual(1, $result);
 	}
 
@@ -574,15 +568,31 @@ class RedisTest extends \lithium\test\Integration {
 		$this->assertInternalType('array', $result, 'redis method dispatch failed');
 	}
 
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsTo() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$this->assertTrue($this->redis->respondsTo('bgsave'));
 		$this->assertTrue($this->redis->respondsTo('dbSize'));
 		$this->assertFalse($this->redis->respondsTo('foobarbaz'));
+
+		error_reporting($backup);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToParentCall() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$this->assertTrue($this->redis->respondsTo('applyFilter'));
 		$this->assertFalse($this->redis->respondsTo('fooBarBaz'));
+
+		error_reporting($backup);
 	}
 }
 

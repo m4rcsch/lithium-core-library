@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -29,7 +29,7 @@ use lithium\analysis\Inspector;
  * @see lithium\template\helper\Form
  * @see lithium\data\Entity::serialize()
  */
-class Entity extends \lithium\core\Object implements \Serializable {
+class Entity extends \lithium\core\ObjectDeprecated implements \Serializable {
 
 	/**
 	 * Fully-namespaced class name of model that this record is bound to. Instance methods declared
@@ -183,9 +183,10 @@ class Entity extends \lithium\core\Object implements \Serializable {
 	}
 
 	/**
-	 * Magic method that allows calling of model methods on this record instance, i.e.:
+	 * Magic method that allows calling of model methods on this record instance.
+	 *
 	 * ```
-	 * $record->validates();
+	 * $post->validates();
 	 * ```
 	 *
 	 * @param string $method Method name caught by `__call()`.
@@ -193,10 +194,9 @@ class Entity extends \lithium\core\Object implements \Serializable {
 	 * @return mixed
 	 */
 	public function __call($method, $params) {
-		if (($model = $this->_model) && method_exists($model, '_object')) {
+		if (($model = $this->_model) && method_exists($model, 'object')) {
 			array_unshift($params, $this);
-			$class = $model::invokeMethod('_object');
-			return call_user_func_array([&$class, $method], $params);
+			return call_user_func_array([$model::object(), $method], $params);
 		}
 		$message = "No model bound to call `{$method}`.";
 		throw new BadMethodCallException($message);
@@ -205,6 +205,7 @@ class Entity extends \lithium\core\Object implements \Serializable {
 	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -212,8 +213,12 @@ class Entity extends \lithium\core\Object implements \Serializable {
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public function respondsTo($method, $internal = false) {
-		if (method_exists($class = $this->_model, '_object')) {
-			$result = $class::invokeMethod('_object')->respondsTo($method);
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= "Use `is_callable([<class>, '<method>'])` instead.";
+		trigger_error($message, E_USER_DEPRECATED);
+
+		if (method_exists($class = $this->_model, 'object')) {
+			$result = $class::object()->respondsTo($method);
 		} else {
 			$result = Inspector::isCallable($class, $method, $internal);
 		}

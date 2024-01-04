@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -39,7 +39,7 @@ use lithium\core\Libraries;
  * @see lithium\action\Request
  * @see lithium\action\Request::env
  */
-class Http extends \lithium\core\Object {
+class Http extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * Dynamic class dependencies.
@@ -125,7 +125,7 @@ class Http extends \lithium\core\Object {
 			$this->_writeHeader("WWW-Authenticate: Basic realm=\"{$this->_config['realm']}\"");
 			return;
 		}
-		return compact('username', 'password');
+		return compact('username') + ['password' => null];
 	}
 
 	/**

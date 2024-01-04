@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -75,7 +75,7 @@ namespace lithium\util;
  * @link http://php.net/class.iterator.php PHP Manual: Iterator Interface
  * @link http://php.net/class.countable.php PHP Manual: Countable Interface
  */
-class Collection extends \lithium\core\Object implements \ArrayAccess, \Iterator, \Countable {
+class Collection extends \lithium\core\ObjectDeprecated implements \ArrayAccess, \Iterator, \Countable {
 
 	/**
 	 * A central registry of global format handlers for `Collection` objects and subclasses.
@@ -211,6 +211,7 @@ class Collection extends \lithium\core\Object implements \ArrayAccess, \Iterator
 	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -218,6 +219,10 @@ class Collection extends \lithium\core\Object implements \ArrayAccess, \Iterator
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public function respondsTo($method, $internal = false) {
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= "Use `is_callable([Collection::first(), '<method>'])` instead.";
+		trigger_error($message, E_USER_DEPRECATED);
+
 		$magicMethod = count($this->_data) > 0 && $this->_data[0]->respondsTo($method, $internal);
 		return $magicMethod || parent::respondsTo($method, $internal);
 	}

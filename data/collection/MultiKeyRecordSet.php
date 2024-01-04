@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -35,10 +35,10 @@ class MultiKeyRecordSet extends \lithium\data\collection\RecordSet {
 	 * Initializes the record set and uses the database connection to get the column list contained
 	 * in the query that created this object.
 	 *
-	 * @see lithium\data\collection\RecordSet::$_columns
-	 * @return void
 	 * @todo The part that uses _handle->schema() should be rewritten so that the column list
 	 *       is coming from the query object.
+	 * @see lithium\data\collection\RecordSet::$_columns
+	 * @return void
 	 */
 	protected function _init() {
 		parent::_init();

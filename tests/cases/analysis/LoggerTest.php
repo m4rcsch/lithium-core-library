@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -200,17 +200,32 @@ class LoggerTest extends \lithium\test\Unit {
 
 	}
 
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToParentCall() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$this->assertTrue(Logger::respondsTo('invokeMethod'));
 		$this->assertFalse(Logger::respondsTo('fooBarBaz'));
+
+		error_reporting($backup);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToMagic() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$this->assertTrue(Logger::respondsTo('emergency'));
 		$this->assertTrue(Logger::respondsTo('debug'));
 		$this->assertFalse(Logger::respondsTo('foobar'));
-	}
 
+		error_reporting($backup);
+	}
 }
 
 ?>

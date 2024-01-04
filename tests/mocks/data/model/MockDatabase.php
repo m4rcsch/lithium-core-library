@@ -2,13 +2,14 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\tests\mocks\data\model;
 
+use lithium\core\Libraries;
 use lithium\tests\mocks\data\model\database\MockResult;
 
 class MockDatabase extends \lithium\data\source\Database {
@@ -66,7 +67,7 @@ class MockDatabase extends \lithium\data\source\Database {
 	public function sources($class = null) {}
 
 	public function describe($entity, $fields = [], array $meta = []) {
-		return $this->_instance('schema', compact('fields'));
+		return Libraries::instance(null, 'schema', compact('fields'), $this->_classes);
 	}
 
 	public function encoding($encoding = null) {}
@@ -86,7 +87,7 @@ class MockDatabase extends \lithium\data\source\Database {
 		return $this->_config;
 	}
 
-	protected function _execute($sql) {
+	protected function _execute($sql, $options = []) {
 		$this->sql = $sql;
 		if ($this->log) {
 			$this->logs[] = $sql;
@@ -126,6 +127,10 @@ class MockDatabase extends \lithium\data\source\Database {
 			'sources' => true
 		];
 		return isset($features[$feature]) ? $features[$feature] : null;
+	}
+
+	public function splitFieldname($field) {
+		return parent::_splitFieldname($field);
 	}
 }
 

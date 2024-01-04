@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -24,7 +24,7 @@ use lithium\template\TemplateException;
  * @see lithium\template\View
  * @see lithium\template\view\adapter
  */
-class Compiler extends \lithium\core\StaticObject {
+class Compiler extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * The list of syntax replacements to apply to compiled templates.

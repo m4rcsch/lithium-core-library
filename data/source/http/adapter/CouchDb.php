@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -11,6 +11,7 @@ namespace lithium\data\source\http\adapter;
 
 use lithium\aop\Filters;
 use lithium\core\ConfigException;
+use lithium\core\Libraries;
 
 /**
  * A data source adapter which allows you to connect to Apache CouchDB.
@@ -125,6 +126,7 @@ class CouchDb extends \lithium\data\source\Http {
 	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -132,6 +134,10 @@ class CouchDb extends \lithium\data\source\Http {
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public function respondsTo($method, $internal = false) {
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= 'Use `is_callable([$adapter->connection, \'<method>\'])` instead.';
+		trigger_error($message, E_USER_DEPRECATED);
+
 		$parentRespondsTo = parent::respondsTo($method, $internal);
 		return $parentRespondsTo || is_callable([$this->connection, $method]);
 	}
@@ -176,7 +182,7 @@ class CouchDb extends \lithium\data\source\Http {
 		if (!$this->_db) {
 			throw new ConfigException("Database `{$entity}` is not available.");
 		}
-		return $this->_instance('schema', [['fields' => $schema]]);
+		return Libraries::instance(null, 'schema', [['fields' => $schema]], $this->_classes);
 	}
 
 	/**

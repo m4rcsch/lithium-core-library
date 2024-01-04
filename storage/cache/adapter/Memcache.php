@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -99,6 +99,30 @@ class Memcache extends \lithium\storage\cache\Adapter {
 	}
 
 	/**
+	 * Generates safe cache keys.
+	 *
+	 * As per the protocol no control characters or whitespace is allowed
+	 * in the key name. There's also a limit of max. 250 characters which is
+	 * checked and enforced here. The limit is actually lowered to 250 minus
+	 * the length of an crc32b hash minus separator (241) minus scope length
+	 * minus separator (241 - x).
+	 *
+	 * @param array $keys The original keys.
+	 * @return array Keys modified and safe to use with adapter.
+	 */
+	public function key(array $keys) {
+		$length = 241 - ($this->_config['scope'] ? strlen($this->_config['scope']) + 1 : 0);
+
+		return array_map(
+			function($key) use ($length) {
+				$result = substr(preg_replace('/[[:cntrl:]\s]/u', '_', $key), 0, $length);
+				return $key !== $result ? $result . '_' . hash('crc32b', $key) : $result;
+			},
+			$keys
+		);
+	}
+
+	/**
 	 * Handles the actual `Memcached` connection and server connection
 	 * adding for the adapter constructor and sets prefix using the scope
 	 * if provided.
@@ -135,6 +159,7 @@ class Memcache extends \lithium\storage\cache\Adapter {
 	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -142,6 +167,10 @@ class Memcache extends \lithium\storage\cache\Adapter {
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public function respondsTo($method, $internal = false) {
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= 'Use `is_callable([$adapter->connection, \'<method>\'])` instead.';
+		trigger_error($message, E_USER_DEPRECATED);
+
 		if (parent::respondsTo($method, $internal)) {
 			return true;
 		}

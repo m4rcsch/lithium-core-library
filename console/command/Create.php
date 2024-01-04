@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -240,7 +240,7 @@ class Create extends \lithium\console\Command {
 				'classes' => $this->_classes
 			]);
 		}
-		return parent::_instance($name, $config);
+		return Libraries::instance(null, $name, $config, $this->_classes);
 	}
 
 	/**
@@ -281,6 +281,18 @@ class Create extends \lithium\console\Command {
 			return "{$params['class']} created in {$relative}.";
 		}
 		return false;
+	}
+
+	/**
+	 * Helper method to access sub-command information from the main command,
+	 * without exposing sub-command information publicly.
+	 *
+	 * @param string $method Name of the method to call
+	 * @param array $param Parameter list to use when calling $method
+	 * @return mixed Returns the result of the method call
+	 */
+	public function invokeMethod($method, $params = []) {
+		return call_user_func_array([$this, $method], $params);
 	}
 }
 

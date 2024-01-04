@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -1337,20 +1337,20 @@ SQL;
 		$this->assertEqual($expected, $result);
 	}
 
-	public function testsplitFieldname() {
-		$result = $this->_db->invokeMethod('_splitFieldname', ['Alias.fieldname']);
+	public function testSplitFieldname() {
+		$result = $this->_db->splitFieldname('Alias.fieldname');
 		$this->assertEqual(['Alias', 'fieldname'], $result);
 
-		$result = $this->_db->invokeMethod('_splitFieldname', ['fieldname']);
+		$result = $this->_db->splitFieldname('fieldname');
 		$this->assertEqual([null, 'fieldname'], $result);
 
-		$result = $this->_db->invokeMethod('_splitFieldname', ['fieldname']);
+		$result = $this->_db->splitFieldname('fieldname');
 		$this->assertEqual([null, 'fieldname'], $result);
 
-		$result = $this->_db->invokeMethod('_splitFieldname', ['lower(Alias.fieldname)']);
+		$result = $this->_db->splitFieldname('lower(Alias.fieldname)');
 		$this->assertEqual([null, 'lower(Alias.fieldname)'], $result);
 
-		$result = $this->_db->invokeMethod('_splitFieldname', ['Alias.*']);
+		$result = $this->_db->splitFieldname('Alias.*');
 		$this->assertEqual(['Alias', '*'], $result);
 	}
 

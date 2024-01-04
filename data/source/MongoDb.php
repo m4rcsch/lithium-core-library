@@ -2,20 +2,21 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\data\source;
 
+use Exception;
 use MongoCode;
 use MongoRegex;
 use lithium\aop\Filters;
-use lithium\util\Inflector;
+use lithium\core\Libraries;
 use lithium\core\NetworkException;
 use lithium\net\HostString;
-use Exception;
+use lithium\util\Inflector;
 
 /**
  * A data source adapter which allows you to connect to the MongoDB database engine. MongoDB is an
@@ -444,7 +445,7 @@ class MongoDb extends \lithium\data\Source {
 		if (!$fields && ($func = $this->_schema)) {
 			$fields = $func($this, $collection, $meta);
 		}
-		return $this->_instance('schema', compact('fields'));
+		return Libraries::instance(null, 'schema', compact('fields'), $this->_classes);
 	}
 
 	/**
@@ -484,6 +485,7 @@ class MongoDb extends \lithium\data\Source {
 	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -491,6 +493,10 @@ class MongoDb extends \lithium\data\Source {
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public function respondsTo($method, $internal = false) {
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= 'Use `is_callable([$adapter->server, \'<method>\'])` instead.';
+		trigger_error($message, E_USER_DEPRECATED);
+
 		$childRespondsTo = is_object($this->server) && is_callable([$this->server, $method]);
 		return parent::respondsTo($method, $internal) || $childRespondsTo;
 	}
@@ -632,9 +638,14 @@ class MongoDb extends \lithium\data\Source {
 			}
 
 			$resource = $result->sort($args['order'])->limit($args['limit'])->skip($args['offset']);
-			$result = $this->_instance('result', compact('resource'));
+			$result = Libraries::instance(null, 'result', compact('resource'), $this->_classes);
 			$config = compact('result', 'query') + ['class' => 'set', 'defaults' => false];
-			return $model::create([], $config);
+			$collection = $model::create([], $config);
+
+			if (is_object($query) && $query->with()) {
+				$model::embed($collection, $query->with());
+			}
+			return $collection;
 		});
 	}
 
@@ -768,6 +779,7 @@ class MongoDb extends \lithium\data\Source {
 		}
 		return !isset($result['err']) || $result['err'] === null;
 	}
+
 	/**
 	 * Executes calculation-related queries, such as those required for `count`.
 	 *
@@ -800,7 +812,7 @@ class MongoDb extends \lithium\data\Source {
 		$config += compact('name', 'type', 'key', 'fieldName');
 		$config['from'] = $class;
 
-		return $this->_instance('relationship', $config + [
+		return Libraries::instance(null, 'relationship', $config + [
 			'strategy' => function($rel) use ($config, $class, $name, $type) {
 				if (isset($config['key'])) {
 					return [];
@@ -845,7 +857,7 @@ class MongoDb extends \lithium\data\Source {
 				}
 				return $result + ($hasLink ? [] : compact('link'));
 			}
-		]);
+		], $this->_classes);
 	}
 
 	/**

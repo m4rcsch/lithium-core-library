@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -611,6 +611,12 @@ class ValidatorTest extends \lithium\test\Unit {
 		$this->assertTrue(Validator::isCreditCard('5297350261550024', 'mc'));
 		$this->assertTrue(Validator::isCreditCard('5162739131368058', 'mc'));
 		$this->assertFalse(Validator::isCreditCard('6767432107064987', 'mc'));
+
+		/* MasterCard 2-Series */
+		$this->assertTrue(Validator::isCreditCard('2221000000000000', 'mc'));
+		$this->assertTrue(Validator::isCreditCard('2720990000000000', 'mc'));
+		$this->assertFalse(Validator::isCreditCard('2121000000000000', 'mc'));
+		$this->assertFalse(Validator::isCreditCard('2821000000000000', 'mc'));
 
 		/* Solo 16 */
 		$this->assertTrue(Validator::isCreditCard('6767432107064987', 'solo'));
@@ -1234,15 +1240,28 @@ class ValidatorTest extends \lithium\test\Unit {
 		$this->assertEqual(['id' => ['Bad ID']], $result);
 	}
 
-	public function testRespondsToParentCall() {
-		$this->assertTrue(Validator::respondsTo('invokeMethod'));
-		$this->assertFalse(Validator::respondsTo('fooBarBaz'));
+	public function testHas() {
+		$this->assertTrue(Validator::has('isAlphaNumeric'));
+		$this->assertTrue(Validator::has('isCreditCard'));
+
+		$this->assertTrue(Validator::has('creditCard'));
+		$this->assertTrue(Validator::has('CreditCard'));
+
+		$this->assertFalse(Validator::has('isFoobar'));
 	}
 
-	public function testRespondsToMagic() {
-		$this->assertTrue(Validator::respondsTo('isAlphaNumeric'));
-		$this->assertTrue(Validator::respondsTo('isCreditCard'));
-		$this->assertFalse(Validator::respondsTo('isFoobar'));
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
+	public function testRespondsToParentCall() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
+		$this->assertTrue(Validator::respondsTo('invokeMethod'));
+		$this->assertFalse(Validator::respondsTo('fooBarBaz'));
+
+		error_reporting($backup);
 	}
 }
 

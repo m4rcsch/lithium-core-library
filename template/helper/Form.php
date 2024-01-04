@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -19,17 +19,20 @@ use lithium\util\Inflector;
  * the helper can pre-fill form input values, render error messages, and introspect column types.
  *
  * For example, assuming you have created a `Posts` model in your application:
+ *
+ * In controller code:
  * ```
- * // In controller code:
  * use app\models\Posts;
  * $post = Posts::find(1);
  * return compact('post');
+ * ```
  *
- * // In view code:
- * <?=$this->form->create($post); // Echoes a <form> tag and binds the helper to $post ?>
- * <?=$this->form->text('title'); // Echoes an <input /> element, pre-filled with $post's title ?>
- * <?=$this->form->submit('Update'); // Echoes a submit button with the title 'Update' ?>
- * <?=$this->form->end(); // Echoes a </form> tag & unbinds the form ?>
+ * In view code:
+ * ```
+ * <?= $this->form->create($post) ?> // Echoes a <form> tag and binds the helper to $post
+ * <?= $this->form->text('title') ?> // Echoes an <input /> element, pre-filled with $post's title
+ * <?= $this->form->submit('Update') ?> // Echoes a submit button with the title 'Update'
+ * <?= $this->form->end() ?> // Echoes a </form> tag & unbinds the form
  * ```
  */
 class Form extends \lithium\template\Helper {
@@ -192,7 +195,7 @@ class Form extends \lithium\template\Helper {
 		parent::_init();
 
 		if ($this->_context) {
-			$this->_context->handlers(['wrap' => '_attributes']);
+			$this->_context->handlers(['wrap' => 'attributes']);
 		}
 	}
 
@@ -398,12 +401,13 @@ class Form extends \lithium\template\Helper {
 		list($name, $options) = $params;
 		list($name, $options, $template) = $this->_defaults($type, $name, $options);
 		$template = $this->_context->strings($template) ? $template : 'input';
-		return $this->_render($type, $template, compact('type', 'name', 'options', 'value'));
+		return $this->_render($type, $template, compact('type', 'name', 'options'));
 	}
 
 	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -411,6 +415,10 @@ class Form extends \lithium\template\Helper {
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public function respondsTo($method, $internal = false) {
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= "Use `is_callable([<class>, '<method>'])` instead.";
+		trigger_error($message, E_USER_DEPRECATED);
+
 		return is_callable([$this, $method], true);
 	}
 
@@ -436,7 +444,7 @@ class Form extends \lithium\template\Helper {
 	 *          parameters. By default, the label text is a human-friendly version of `$name`.
 	 *          However, you can specify the label manually as a string, or both the label
 	 *          text and options as an array, i.e.:
-	 *          `array('Your Label Title' => ['class' => 'foo', 'other' => 'options'])`.
+	 *          `['Your Label Title' => ['class' => 'foo', 'other' => 'options']]`.
 	 *        - `'type'` _string_: The type of form field to render. Available default options
 	 *          are: `'text'`, `'textarea'`, `'select'`, `'checkbox'`, `'password'` or
 	 *          `'hidden'`, as well as any arbitrary type (i.e. HTML5 form fields).
@@ -499,13 +507,12 @@ class Form extends \lithium\template\Helper {
 			$label = $this->label(isset($options['id']) ? $options['id'] : '', $options['label']);
 		}
 
+		$datalist = null;
 		if ($type === 'text' && $list) {
 			if (is_array($list)) {
 				list($list, $datalist) = $this->_datalist($list, $options);
 			}
 			$field['list'] = $list;
-		} else {
-			$datalist = null;
 		}
 
 		$call = ($type === 'select') ? [$name, $list, $field] : [$name, $field];
@@ -535,10 +542,10 @@ class Form extends \lithium\template\Helper {
 
 		foreach ($fields as $field => $label) {
 			if (is_numeric($field)) {
-				$field = $label;
-				unset($label);
+				$result[] = $this->field($label, $options);
+			} else {
+				$result[] = $this->field($field, compact('label') + $options);
 			}
-			$result[] = $this->field($field, compact('label') + $options);
 		}
 		return join("\n", $result);
 	}
@@ -556,7 +563,7 @@ class Form extends \lithium\template\Helper {
 		list($scope, $options) = $this->_options($defaults, $options);
 		list($title, $options, $template) = $this->_defaults(__METHOD__, $title, $options);
 
-		$arguments = compact('type', 'title', 'options', 'value');
+		$arguments = compact('title', 'options');
 		return $this->_render(__METHOD__, 'button', $arguments, $scope);
 	}
 

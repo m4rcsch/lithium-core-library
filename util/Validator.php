@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -144,7 +144,7 @@ use InvalidArgumentException;
  * done, having this feature enabled in PCRE isn't optional. Please ensure
  * you've got PCRE compiled with UTF-8 support.
  */
-class Validator extends \lithium\core\StaticObject {
+class Validator extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * An array of validation rules.  May contain a single regular expression, an array of regular
@@ -191,7 +191,7 @@ class Validator extends \lithium\core\StaticObject {
 				'enroute'  => '/^2(?:014|149)\\d{11}$/',
 				'jcb'      => '/^(3\\d{4}|2100|1800)\\d{11}$/',
 				'maestro'  => '/^(?:5020|6\\d{3})\\d{12}$/',
-				'mc'       => '/^5[1-5]\\d{14}$/',
+				'mc'       => '/^(?:5[1-5]|2[2-7])\\d{14}$/',
 				'solo'     => '/^(6334[5-9][0-9]|6767[0-9]{2})\\d{10}(\\d{2,3})?$/',
 				'switch'   => '/^(?:49(03(0[2-9]|3[5-9])|11(0[1-2]|7[4-9]|8[1-2])|36[0-9]{2})' .
 				              '\\d{10}(\\d{2,3})?)|(?:564182\\d{10}(\\d{2,3})?)|(6(3(33[0-4]' .
@@ -391,8 +391,24 @@ class Validator extends \lithium\core\StaticObject {
 	}
 
 	/**
+	 * Checks whether a rule under given name exists and can be called using `is<Name>`
+	 * syntax.
+	 *
+	 * @param string $rule Name of the rule.
+	 * @return boolean `true` if the rule exists, `false` if not.
+	 */
+	public static function has($rule) {
+		if (!preg_match('/^(is)?([A-Za-z0-9]+)$/', $rule, $matches)) {
+			return false;
+		}
+		$matches[2][0] = strtolower($matches[2][0]);
+		return isset(static::$_rules[$matches[2]]);
+	}
+
+	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -400,6 +416,10 @@ class Validator extends \lithium\core\StaticObject {
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public static function respondsTo($method, $internal = false) {
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= "Use `Validator::has()` or `is_callable([<class>, '<method>'])` instead.";
+		trigger_error($message, E_USER_DEPRECATED);
+
 		$rule = preg_replace("/^is([A-Z][A-Za-z0-9]+)$/", '$1', $method);
 		$rule[0] = strtolower($rule[0]);
 		return isset(static::$_rules[$rule]) || parent::respondsTo($method, $internal);

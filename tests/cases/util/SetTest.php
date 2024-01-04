@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -471,12 +471,6 @@ class SetTest extends \lithium\test\Unit {
 
 		$expected = [1, 2, 3, 4, 5];
 		$result = Set::extract($a, '/User/id');
-		$this->assertEqual($expected, $result);
-
-		$expected = [
-			['id' => 1], ['id' => 2], ['id' => 3], ['id' => 4], ['id' => 5]
-		];
-		$result = Set::extract($a, '/User/id', ['flatten' => false]);
 		$this->assertEqual($expected, $result);
 
 		$expected = [['test' => $a[0]['Deep']['Nesting']['test']]];
@@ -1504,6 +1498,58 @@ class SetTest extends \lithium\test\Unit {
 		list($kept, $removed) = Set::slice($data, ['key1', 'key3']);
 		$this->assertEqual(['key1' => 'val1', 'key3' => ['foo' => 'bar']], $removed);
 		$this->assertEqual(['key2' => 'val2'], $kept);
+	}
+
+	/* Deprecated / BC */
+
+	public function testExtractInNonFlattenMode() {
+		error_reporting(($original = error_reporting()) & ~E_USER_DEPRECATED);
+
+		$a = [
+			[
+				'User' => [
+					'id' => '1', 'user' => 'mariano',
+					'password' => '5f4dcc3b5aa765d61d8327deb882cf99',
+					'created' => '2007-03-17 01:16:23',
+					'updated' => '2007-03-17 01:18:31'
+				],
+			],
+			[
+				'User' => [
+					'id' => '2', 'user' => 'mariano',
+					'password' => '5f4dcc3b5aa765d61d8327deb882cf99',
+					'created' => '2007-03-17 01:16:23', 'updated' => '2007-03-17 01:18:31'
+				],
+			],
+			[
+				'User' => [
+					'id' => '3', 'user' => 'mariano',
+					'password' => '5f4dcc3b5aa765d61d8327deb882cf99',
+					'created' => '2007-03-17 01:16:23', 'updated' => '2007-03-17 01:18:31'
+				],
+			],
+			[
+				'User' => [
+					'id' => '4', 'user' => 'mariano',
+					'password' => '5f4dcc3b5aa765d61d8327deb882cf99',
+					'created' => '2007-03-17 01:16:23', 'updated' => '2007-03-17 01:18:31'
+				],
+			],
+			[
+				'User' => [
+					'id' => '5', 'user' => 'mariano',
+					'password' => '5f4dcc3b5aa765d61d8327deb882cf99',
+					'created' => '2007-03-17 01:16:23', 'updated' => '2007-03-17 01:18:31'
+				],
+			]
+		];
+		$expected = [
+			['id' => 1], ['id' => 2], ['id' => 3], ['id' => 4], ['id' => 5]
+		];
+		$result = Set::extract($a, '/User/id', ['flatten' => false]);
+		$this->assertEqual($expected, $result);
+
+		error_reporting($original);
 	}
 }
 

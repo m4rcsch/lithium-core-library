@@ -2,15 +2,16 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\tests\cases\console\command\create;
 
-use lithium\console\command\create\Model;
+use ReflectionMethod;
 use lithium\console\Request;
+use lithium\console\command\create\Model;
 use lithium\core\Libraries;
 
 class ModelTest extends \lithium\test\Unit {
@@ -50,9 +51,11 @@ class ModelTest extends \lithium\test\Unit {
 		$model = new Model([
 			'request' => $this->request, 'classes' => $this->classes
 		]);
+		$method = new ReflectionMethod($model, '_class');
+		$method->setAccessible(true);
 
 		$expected = 'Posts';
-		$result = $model->invokeMethod('_class', [$this->request]);
+		$result = $method->invokeArgs($model, [$this->request]);
 		$this->assertEqual($expected, $result);
 	}
 }

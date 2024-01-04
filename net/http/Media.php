@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -33,7 +33,7 @@ use lithium\net\http\MediaException;
  * 	$this->render(['csv' => Post::find('all')]);
  * ```
  */
-class Media extends \lithium\core\StaticObject {
+class Media extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * Contain the configuration of scopes.
@@ -727,7 +727,7 @@ class Media extends \lithium\core\StaticObject {
 			unset($handler['view']);
 
 			$config = $handler + ['response' => &$response];
-			return static::_instance($class, $config);
+			return Libraries::instance(null, $class, $config, static::$_classes);
 		});
 	}
 
@@ -1006,7 +1006,7 @@ class Media extends \lithium\core\StaticObject {
 	 * Example:
 	 * ```
 	 * Media::attach('app', [
-	 *     'path' => '/var/www/website/app/webroot/extradir',
+	 *     'path' => '/var/www/website/webroot/extradir',
 	 *     'prefix' => 'extradir'
 	 * ]);
 	 * ```
@@ -1081,7 +1081,7 @@ class Media extends \lithium\core\StaticObject {
 	 * Initialize `static::$_scopes` with a `lithium\core\Configuration` instance.
 	 */
 	protected static function _initScopes() {
-		static::$_scopes = static::_instance('configuration');
+		static::$_scopes = Libraries::instance(null, 'configuration', [], static::$_classes);
 		static::$_scopes->initConfig = function($name, $config) {
 			$defaults = [
 				'absolute' => false,

@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -1092,25 +1092,47 @@ class MongoDbTest extends \lithium\test\Unit {
 		Connections::remove('temp');
 	}
 
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToParentCall() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$db = new MongoDb($this->_testConfig);
 		$this->assertTrue($db->respondsTo('_parents'));
 		$this->assertFalse($db->respondsTo('fooBarBaz'));
+
+		error_reporting($backup);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToWithNoServer() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$db = new MongoDb($this->_testConfig);
 		$this->assertFalse($db->respondsTo('listDBs'));
 		$this->assertFalse($db->respondsTo('foobarbaz'));
+
+		error_reporting($backup);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToWithServer() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$db = new MongoDb($this->_testConfig);
 		$db->server = new MockMongoConnection();
 		$this->assertTrue($db->respondsTo('listDBs'));
 		$this->assertFalse($db->respondsTo('foobarbaz'));
-	}
 
+		error_reporting($backup);
+	}
 }
 
 ?>

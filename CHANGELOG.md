@@ -1,5 +1,138 @@
 # Change Log
 
+## v1.2.0
+
+### Added
+
+- PHP 7.1 support
+
+- PHP 7.2 partial support, please read the note on extending from `*Object` below
+
+- PHP 7.3 partial support, please read the note on extending from `*Object` below
+
+- The `li3_fixtures` library is now part of the framework `test` package.
+
+- Data sources now support the `nested` strategy which will embed related records/documents by
+  fetching them using additional queries. (jails) 
+	
+  This strategy is auto-enabled on NoSQL-style databases where documents now
+  do not have to be fetched manually anymore. For classic relational databases
+  the new strategy can be enabled on a per query basis, if preferred over the
+  default `joined` strategy:
+
+  ```
+  Galleries::find('all', ['with' => 'Images', 'strategy' => 'nested'])
+  ```
+
+  Please note that records/documents - fetched using this strategy - cannot be
+  further constrained by conditions.
+
+- `Cache::key()` learned to generate safe cache keys. Where each adapter defines
+  what "safe" means. The method was all in all made more flexible and feature rich
+  as it added support for reusable and key mutating generator functions as well as
+  support for key generation by passing any form of data.
+
+- `action\Request` is now (via `$this->request->is('dnt')`) able to detect if the 
+  _Do Not Track_ feature is enabled.
+
+- The auto-library feature for scoped routes can now be disabled, so it's possible to
+  i.e. have an app and an admin scope, where the admin scope itself contains several 
+  admin libraries.
+
+- `openssl_random_pseudo_bytes()` has been added as a new RNG source.
+
+- Added `core\MergeInheritable` trait which allows classes to merge their array
+  properties with such properties defined in class parents. Used mainly for
+  merging `action\Controller::$_render` and `data\Model` properties. Also 
+  slightly optimizes memory usage in said classes.
+
+- The `Response` now knows about HTTP status code 426 (Upgrade Required).
+
+- The `Encrypt` session strategy now uses the `openssl` extension for symmetric 
+  encryption for better support and performance, whenever possible. Previously the,
+  now deprecated, `mcrypt` extension was always used. When `openssl` cannot be 
+  used as a drop in, the strategy will fall back to `mcrypt` usage (aka _legacy_ 
+  mode). This is the case when a non-default cipher mode (anything else than AES 256 
+  CBC) has been chosen or the `openssl` extension is not available.
+
+- The credit card validator now supports MasterCard 2-series. (Grayson Scherer)
+
+- `Libraries::instance()` now accepts a class map as a 4th parameter.
+
+- `Helper::attributes()` is now part of the public API.
+
+- `Model::hasFinder()` checks if a given finder is available, works for magic finders, too.
+
+- `Validator::has()` checks if a rule is available under given name.
+
+### Changed
+
+- The undocumented feature in `Cache::{write,read,delete,increment,decrement}()`, where 
+  these methods supported callables as keys has been removed. Keys can now be of scalar 
+  type only.
+
+- `Cache::key()` now requires a cache configuration name as it's first argument.
+
+- Dropped support for PHP 5.5
+
+- The `Encrypt` strategy now depends on the `openssl` extension, when it does not
+  operate in _legacy_ mode (see above). In this case it also doesn't depend on the 
+  `mcrypt` extension anymore.
+
+- With HTML5 stating the type when linking or embedding scripts and styles using
+  `text/css` and `text/javascript` has become unnecessary. The `Html` helper will 
+  now generate `<link>`, `<style>` and `<script>` tags without such types.
+
+### Deprecated
+
+- Short rendering instructions have now been officially deprecated and trigger a
+  deprecation message. Usage of short syntax was already discouraged.
+  
+  ```
+  ['template' => '/path/to/template'] // short deprecated syntax
+  ['template' => ['path' => '/path/to/template']] // full valid syntax
+  ```
+
+- `Object` and `StaticObject` are being deprecated, as
+  `Object` is soft-reserved in PHP >=7. Chance is taken for a cleanup of the
+  class-hirarchy and unused/obsolete methods. Newly created classes should
+  not inherit from `Object`/`StaticObject` anymore. 
+
+  When using the framework with PHP >=7.2, ensure you are extending
+  `ObjectDeprecated` and `StaticObjectDeprecated`, for all other PHP versions
+  this change is not required.
+  
+  | old | new |
+  | --- | --- |
+  | `*Object::$_autoConfig` | use `lithium\core\AutoConfigurable` |
+  | `*Object::_init()` | _no replacement_ |
+  | `*Object::_instance()` | replaced, use `lithium\core\Libraries::instance()` |
+  | `analysis\Inspector::_instance()` |  replaced, use `lithium\core\Libraries::instance()` |
+  | `data\Model::_instance()` |  replaced, use `lithium\core\Libraries::instance()` |
+  | `*Object::_parents()` | replaced, use `lithium\core\MergeInheritable::_inherit()` |
+  | `*Object::_stop()` | _no replacement_, must reimplement |
+  | `Object::__set_state()` | _no replacement_ |
+  | `*Object::invokeMethod()` | _no replacement_, use `call_user_func_array()` |
+  | `analysis\Inspector::invokeMethod()` | _no replacement_ |
+  | `Model::respondsTo()` | use `Model::hasFinder()` instead |
+  | `Validator::respondsTo()` | use `Validator::has()` instead |
+  | `*::respondsTo()` | use `is_callable()` instead |
+
+- Changing the default cipher and/or mode for the `Encrypt` strategy has been 
+  deprecated and will cause the strategy to switch into _legacy_ mode. In legacy
+  mode the deprecated `mcrypt` extension will still be used.
+
+- Deprecated the non-flatten mode in `Set::extract()` as it is rarely used.
+
+### Fixed
+
+- The `'key'` and `'class'` options were supposed to be provided only for
+  Session strategies. They however leaked into Session adapters options.
+
+- A potential invalid reuse of a previously initialized `mcrypt` resource
+  has been fixed when using multiple `Encrypt` strategies with different
+  ciphers and/or modes. 
+
 ## v1.1.1
 
 ### Added

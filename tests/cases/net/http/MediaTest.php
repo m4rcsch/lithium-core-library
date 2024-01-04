@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -525,7 +525,7 @@ class MediaTest extends \lithium\test\Unit {
 		$response->type('html');
 
 		$this->assertException("/Template not found/", function() use ($response) {
-			Media::render($response, null, compact('request'));
+			Media::render($response, null);
 		});
 
 		$this->_cleanUp();

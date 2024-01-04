@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -11,6 +11,7 @@ namespace lithium\console;
 
 use Exception;
 use lithium\console\command\Help;
+use lithium\core\Libraries;
 
 /**
  * All Commands to be run from the Lithium console must extend this class.
@@ -24,7 +25,7 @@ use lithium\console\command\Help;
  * ```
  *
  */
-class Command extends \lithium\core\Object {
+class Command extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * A Request object.
@@ -118,9 +119,12 @@ class Command extends \lithium\core\Object {
 		$this->response = $this->_config['response'];
 
 		if (!is_object($this->response)) {
-			$this->response = $this->_instance('response', $this->response + [
-				'plain' => $this->plain
-			]);
+			$this->response = Libraries::instance(
+				null,
+				'response',
+				$this->response + ['plain' => $this->plain],
+				$this->_classes
+			);
 		}
 	}
 
@@ -137,7 +141,7 @@ class Command extends \lithium\core\Object {
 	public function __invoke($action, $args = []) {
 		try {
 			$this->response->status = 1;
-			$result = $this->invokeMethod($action, $args);
+			$result = call_user_func_array(array($this, $action), $args);
 
 			if (is_int($result)) {
 				$this->response->status = $result;
@@ -422,6 +426,16 @@ class Command extends \lithium\core\Object {
 			$string = $string . $this->nl((integer) $options['nl']);
 		}
 		return $this->response->{$type}($string);
+	}
+
+	/**
+	 * Exit immediately. Primarily used for overrides during testing.
+	 *
+	 * @param integer|string $status integer range 0 to 254, string printed on exit
+	 * @return void
+	 */
+	protected function _stop($status = 0) {
+		exit($status);
 	}
 }
 

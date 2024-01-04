@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -341,17 +341,33 @@ class HttpTest extends \lithium\test\Unit {
 		$this->assertEqual($expected, $result);
 	}
 
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsTo() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$http = new Http();
 		$this->assertFalse($http->respondsTo('refactor'));
 		$this->assertTrue($http->respondsTo('create'));
 		$this->assertTrue($http->respondsTo('read'));
+
+		error_reporting($backup);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToParentCall() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$http = new Http();
 		$this->assertTrue($http->respondsTo('invokeMethod'));
 		$this->assertFalse($http->respondsTo('fooBarBaz'));
+
+		error_reporting($backup);
 	}
 }
 

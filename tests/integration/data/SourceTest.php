@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -11,7 +11,7 @@ namespace lithium\tests\integration\data;
 
 use lithium\tests\fixture\model\gallery\Images;
 use lithium\tests\fixture\model\gallery\Galleries;
-use li3_fixtures\test\Fixtures;
+use lithium\test\Fixtures;
 use Exception;
 
 class SourceTest extends \lithium\tests\integration\data\Base {
@@ -36,9 +36,6 @@ class SourceTest extends \lithium\tests\integration\data\Base {
 	 */
 	public function skip() {
 		parent::connect($this->_connection);
-		if (!class_exists('li3_fixtures\test\Fixtures')) {
-			$this->skipIf(true, 'Need `li3_fixtures` to run tests.');
-		}
 	}
 
 	/**

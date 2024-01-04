@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -12,6 +12,7 @@ namespace lithium\tests\cases\console\command;
 use lithium\console\command\Test;
 use lithium\console\Request;
 use lithium\core\Libraries;
+use lithium\tests\mocks\console\command\MockTest;
 
 class TestTest extends \lithium\test\Unit {
 
@@ -204,11 +205,11 @@ class TestTest extends \lithium\test\Unit {
 		mkdir($testDir, 0777, true);
 		Libraries::add('test_app', ['path' => $testApp]);
 		$request = new Request(['env' => ['working' => $testApp]]);
-		$command = new Test([
+		$command = new MockTest([
 			'request' => $request, 'classes' => $this->classes
 		]);
 		$expected = 'test_app\tests\cases\models';
-		$result = $command->invokeMethod('_path', ['tests\cases\models']);
+		$result = $command->path('tests\cases\models');
 		$this->assertIdentical($expected, $result);
 		Libraries::remove('test_app');
 		$this->_cleanUp();

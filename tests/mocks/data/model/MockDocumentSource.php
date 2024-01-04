@@ -2,12 +2,14 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\tests\mocks\data\model;
+
+use lithium\core\Libraries;
 
 class MockDocumentSource extends \lithium\data\Source {
 
@@ -22,7 +24,7 @@ class MockDocumentSource extends \lithium\data\Source {
 	public function disconnect() {}
 	public function sources($class = null) {}
 	public function describe($entity, $schema = [], array $meta = []) {
-		return $this->_instance('schema');
+		return Libraries::instance(null, 'schema', [], $this->_classes);
 	}
 	public function create($query, array $options = []) {}
 	public function update($query, array $options = []) {}

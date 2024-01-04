@@ -2,12 +2,14 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\data\source;
+
+use lithium\core\Libraries;
 
 /**
  * The `Mock` data source is used behind-the-scenes when a model does not use a backend data source.
@@ -42,7 +44,7 @@ class Mock extends \lithium\data\Source {
 	}
 
 	public function describe($entity, $fields = [], array $meta = []) {
-		return $this->_instance('schema', compact('fields'));
+		return Libraries::instance(null, 'schema', compact('fields'), $this->_classes);
 	}
 
 	public function relationship($class, $type, $name, array $options = []) {

@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -47,17 +47,17 @@ class MockProduct extends \lithium\data\Model {
 	];
 
 	public static function finders() {
-		$self = static::_object();
+		$self = static::object();
 		return $self->_finders;
 	}
 
 	public static function initializers() {
-		$self = static::_object();
+		$self = static::object();
 		return $self->_initializers;
 	}
 
 	public static function attribute($name) {
-		$self = static::_object();
+		$self = static::object();
 		return isset($self->$name) ? $self->$name : null;
 	}
 }

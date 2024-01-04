@@ -7,13 +7,17 @@
  * The full license text can be found in the LICENSE.txt file.
  */
 
-namespace lithium\tests\mocks\core;
+namespace lithium\tests\fixture\model\mongodb;
 
-class MockObjectForParents extends \lithium\core\Object {
+class Tags extends \lithium\data\Model {
 
-	public static function parents() {
-		return static::_parents();
-	}
+	public $hasMany = ['ImagesTags'];
+
+	protected $_schema = [
+		'_id' => ['type' => 'id'],
+		'name' => ['type' => 'string', 'length' => 50],
+		'author' => ['type' => 'id']
+	];
 }
 
 ?>

@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -26,9 +26,9 @@ class MockCouchPost extends \lithium\data\Model {
 
 	public static function resetSchema($array = false) {
 		if ($array) {
-			return static::_object()->_schema = [];
+			return static::object()->_schema = [];
 		}
-		static::_object()->_schema = new DocumentSchema();
+		static::object()->_schema = new DocumentSchema();
 	}
 }
 

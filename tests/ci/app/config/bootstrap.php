@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2013, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -19,7 +19,6 @@ use lithium\core\Libraries;
 
 Libraries::add('lithium');
 Libraries::add('app', ['default' => true]);
-Libraries::add('li3_fixtures');
 
 if (file_exists($file = LITHIUM_LIBRARY_PATH . '/autoload.php')) {
 	require_once $file;

@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -130,10 +130,7 @@ class Help extends \lithium\console\Command {
 			if ($item->name[0] === '_') {
 				return;
 			}
-			$modifiers = array_values(Inspector::invokeMethod('_modifiers', [$item]));
-			$setAccess = array_intersect($modifiers, ['private', 'protected']) != [];
-
-			if ($setAccess) {
+			if ($setAccess = !$item->isPublic()) {
 				$item->setAccessible(true);
 			}
 			$args = [];
@@ -145,7 +142,7 @@ class Help extends \lithium\console\Command {
 					'description' => null
 				];
 			}
-			$result = compact('modifiers', 'args') + [
+			$result = compact('args') + [
 				'docComment' => $item->getDocComment(),
 				'name' => $item->getName()
 			];

@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -29,7 +29,7 @@ use lithium\core\ConfigException;
  *
  * This static class should **never** be called explicitly.
  */
-class Adaptable extends \lithium\core\StaticObject {
+class Adaptable extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * Must always be re-defined in sub-classes. Can provide initial

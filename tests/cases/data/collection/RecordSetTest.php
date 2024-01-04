@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -652,7 +652,6 @@ class RecordSetTest extends \lithium\test\Unit {
 		$model = $this->_model;
 
 		$recordSet = new MockRecordSet(compact('result', 'model') + ['exists' => true]);
-
 		foreach ($recordSet as $i => $word) {
 			$array = $word->to('array');
 			if ($array['data'] === 'delete') {

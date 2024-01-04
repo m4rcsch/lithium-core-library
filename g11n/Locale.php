@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -44,7 +44,7 @@ use lithium\console\Request as ConsoleRequest;
  * @link http://www.rfc-editor.org/rfc/bcp/bcp47.txt
  * @link http://www.iana.org/assignments/language-subtag-registry
  */
-class Locale extends \lithium\core\StaticObject {
+class Locale extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * Properties for locale tags.
@@ -74,7 +74,7 @@ class Locale extends \lithium\core\StaticObject {
 	 * @return mixed
 	 */
 	public static function __callStatic($method, $params = []) {
-		$tags = static::invokeMethod('decompose', $params);
+		$tags = static::decompose(current($params));
 
 		if (!isset(static::$_tags[$method])) {
 			throw new BadMethodCallException("Invalid locale tag `{$method}`.");
@@ -85,6 +85,7 @@ class Locale extends \lithium\core\StaticObject {
 	/**
 	 * Determines if a given method can be called.
 	 *
+	 * @deprecated
 	 * @param string $method Name of the method.
 	 * @param boolean $internal Provide `true` to perform check from inside the
 	 *                class/object. When `false` checks also for public visibility;
@@ -92,6 +93,10 @@ class Locale extends \lithium\core\StaticObject {
 	 * @return boolean Returns `true` if the method can be called, `false` otherwise.
 	 */
 	public static function respondsTo($method, $internal = false) {
+		$message  = '`' . __METHOD__ . '()` has been deprecated. ';
+		$message .= "Use `is_callable('<class>::<method>')` instead.";
+		trigger_error($message, E_USER_DEPRECATED);
+
 		return isset(static::$_tags[$method]) || parent::respondsTo($method, $internal);
 	}
 

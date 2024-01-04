@@ -2,12 +2,14 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\tests\mocks\data\source\database\adapter;
+
+use lithium\core\Libraries;
 
 class MockAdapter extends \lithium\data\source\Database {
 
@@ -64,7 +66,7 @@ class MockAdapter extends \lithium\data\source\Database {
 	}
 
 	public function describe($entity, $fields = [], array $meta = []) {
-		return $this->_instance('schema', compact('fields', 'meta'));
+		return Libraries::instance(null, 'schema', compact('fields', 'meta'), $this->_classes);
 	}
 
 	public function create($record, array $options = []) {
@@ -142,7 +144,7 @@ class MockAdapter extends \lithium\data\source\Database {
 	public function key() {
 	}
 
-	protected function _execute($sql) {
+	protected function _execute($sql, $options = []) {
 		return $sql;
 	}
 

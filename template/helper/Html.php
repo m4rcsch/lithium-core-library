@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -30,9 +30,9 @@ class Html extends \lithium\template\Helper {
 		'block-start'      => '<div{:options}>',
 		'charset'          => '<meta charset="{:encoding}" />',
 		'image'            => '<img src="{:path}"{:options} />',
-		'js-block'         => '<script type="text/javascript"{:options}>{:content}</script>',
+		'js-block'         => '<script{:options}>{:content}</script>',
 		'js-end'           => '</script>',
-		'js-start'         => '<script type="text/javascript"{:options}>',
+		'js-start'         => '<script{:options}>',
 		'link'             => '<a href="{:url}"{:options}>{:title}</a>',
 		'list'             => '<ul{:options}>{:content}</ul>',
 		'list-item'        => '<li{:options}>{:content}</li>',
@@ -40,10 +40,10 @@ class Html extends \lithium\template\Helper {
 		'meta-link'        => '<link href="{:url}"{:options} />',
 		'para'             => '<p{:options}>{:content}</p>',
 		'para-start'       => '<p{:options}>',
-		'script'           => '<script type="text/javascript" src="{:path}"{:options}></script>',
-		'style'            => '<style type="text/css"{:options}>{:content}</style>',
-		'style-import'     => '<style type="text/css"{:options}>@import url({:url});</style>',
-		'style-link'       => '<link rel="{:type}" type="text/css" href="{:path}"{:options} />',
+		'script'           => '<script src="{:path}"{:options}></script>',
+		'style'            => '<style{:options}>{:content}</style>',
+		'style-import'     => '<style{:options}>@import url({:url});</style>',
+		'style-link'       => '<link rel="{:type}" href="{:path}"{:options} />',
 		'table-header'     => '<th{:options}>{:content}</th>',
 		'table-header-row' => '<tr{:options}>{:content}</tr>',
 		'table-cell'       => '<td{:options}>{:content}</td>',
@@ -204,7 +204,7 @@ class Html extends \lithium\template\Helper {
 	 * prefixed with `'/'`, the path will be relative to the base path of your application.
 	 * Otherwise, the path will be relative to your stylesheets path, usually `webroot/css`.
 	 *
-	 * @param mixed $path The name of a CSS stylesheet in `/app/webroot/css`, or an array
+	 * @param mixed $path The name of a CSS stylesheet in `webroot/css`, or an array
 	 *              containing names of CSS stylesheets in that directory.
 	 * @param array $options Available options are:
 	 *              - `'inline'` _boolean_: Whether or not the `<style />` element should be output
@@ -280,7 +280,7 @@ class Html extends \lithium\template\Helper {
 	 * @param string $path Path to the image file. If the filename is prefixed with
 	 *               `'/'`, the path will be relative to the base path of your application.
 	 *               Otherwise the path will be relative to the images directory, usually
-	 *               `app/webroot/img/`. If the name starts with `'http://'`, this is treated
+	 *               `webroot/img/`. If the name starts with `'http://'`, this is treated
 	 *               as an external url used as the `src` attribute.
 	 * @param array $options Array of HTML attributes.
 	 * @return string Returns a formatted `<img />` tag.

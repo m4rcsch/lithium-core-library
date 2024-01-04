@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -16,7 +16,7 @@ namespace lithium\analysis;
  * a reflection-based API generator, a code metrics analyzer, and various other code or structural
  * analysis tools.
  */
-class Docblock extends \lithium\core\StaticObject {
+class Docblock extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * List of supported docblock tags.

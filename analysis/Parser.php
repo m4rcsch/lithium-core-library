@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -16,7 +16,7 @@ use lithium\util\Collection;
  * The parser class uses PHP's tokenizer to provide methods and tools for performing static analysis
  * on PHP code.
  */
-class Parser extends \lithium\core\StaticObject {
+class Parser extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * Convenience method to get the token name of a PHP code string. If multiple tokens are

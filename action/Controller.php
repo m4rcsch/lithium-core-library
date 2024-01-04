@@ -2,17 +2,17 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\action;
 
-use lithium\util\Inflector;
 use lithium\action\DispatchException;
-use lithium\core\Libraries;
 use lithium\aop\Filters;
+use lithium\core\Libraries;
+use lithium\util\Inflector;
 
 /**
  * The `Controller` class is the fundamental building block of your application's request/response
@@ -41,7 +41,9 @@ use lithium\aop\Filters;
  * @see lithium\action\Dispatcher
  * @see lithium\action\Controller::$_render
  */
-class Controller extends \lithium\core\Object {
+class Controller extends \lithium\core\ObjectDeprecated {
+
+	use \lithium\core\MergeInheritable;
 
 	/**
 	 * Contains an instance of the `Request` object with all the details of the HTTP request that
@@ -144,7 +146,10 @@ class Controller extends \lithium\core\Object {
 	 */
 	public function __construct(array $config = []) {
 		$defaults = [
-			'request' => null, 'response' => [], 'render' => [], 'classes' => []
+			'request' => null,
+			'response' => [],
+			'render' => [],
+			'classes' => []
 		];
 		parent::__construct($config + $defaults);
 	}
@@ -158,19 +163,12 @@ class Controller extends \lithium\core\Object {
 	protected function _init() {
 		parent::_init();
 
-		foreach (static::_parents() as $parent) {
-			$inherit = get_class_vars($parent);
-
-			if (isset($inherit['_render'])) {
-				$this->_render += $inherit['_render'];
-			}
-			if ($parent === __CLASS__) {
-				break;
-			}
-		}
+		$this->_inherit(['_render']);
 
 		$this->request = $this->request ?: $this->_config['request'];
-		$this->response = $this->_instance('response', $this->_config['response']);
+		$this->response = Libraries::instance(
+			null, 'response', $this->_config['response'], $this->_classes
+		);
 
 		if (!$this->request || $this->_render['type']) {
 			return;
@@ -210,7 +208,7 @@ class Controller extends \lithium\core\Object {
 			}
 			$this->_render['template'] = $this->_render['template'] ?: $action;
 
-			if ($result = $this->invokeMethod($action, $args)) {
+			if ($result = call_user_func_array(array($this, $action), $args)) {
 				if (is_string($result)) {
 					$this->render(['text' => $result]);
 					return $this->response;
@@ -336,6 +334,16 @@ class Controller extends \lithium\core\Object {
 			$this->_stop();
 		}
 		return $this->response;
+	}
+
+	/**
+	 * Exit immediately. Primarily used for overrides during testing.
+	 *
+	 * @param integer|string $status integer range 0 to 254, string printed on exit
+	 * @return void
+	 */
+	protected function _stop($status = 0) {
+		exit($status);
 	}
 }
 

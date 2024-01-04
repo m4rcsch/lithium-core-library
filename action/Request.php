@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -110,6 +110,7 @@ class Request extends \lithium\net\http\Request {
 		'ajax'    => ['HTTP_X_REQUESTED_WITH', 'XMLHttpRequest'],
 		'flash'   => ['HTTP_USER_AGENT', 'Shockwave Flash'],
 		'ssl'     => 'HTTPS',
+		'dnt'     => ['HTTP_DNT', '1'],
 		'get'     => ['REQUEST_METHOD', 'GET'],
 		'post'    => ['REQUEST_METHOD', 'POST'],
 		'patch'   => ['REQUEST_METHOD', 'PATCH'],
@@ -239,8 +240,6 @@ class Request extends \lithium\net\http\Request {
 	 * Initializes request object by setting up mobile detectors, determining method and
 	 * populating the data property either by using i.e. form data or reading from STDIN in
 	 * case binary data is streamed. Will merge any files posted in forms with parsed data.
-	 *
-	 * Note that only beginning with PHP 5.6 STDIN can be opened/read and closed more than once.
 	 *
 	 * @see lithium\action\Request::_parseFiles()
 	 */

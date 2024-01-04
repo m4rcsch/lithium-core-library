@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -20,7 +20,7 @@ use lithium\core\Environment;
  * This Dispatcher is used exclusively for the purpose of running, organizing and compiling
  * statistics for the built-in Lithium test suite.
  */
-class Dispatcher extends \lithium\core\StaticObject {
+class Dispatcher extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * Composed classes used by the Dispatcher.
@@ -86,9 +86,9 @@ class Dispatcher extends \lithium\core\StaticObject {
 	 * @return object Group object constructed with `$data`.
 	 */
 	protected static function _group($data) {
-		$group = Libraries::locate('test', static::$_classes['group']);
-		$class = static::_instance($group, compact('data'));
-		return $class;
+		return Libraries::instance(
+			'test', static::$_classes['group'], compact('data')
+		);
 	}
 
 	/**
@@ -102,9 +102,9 @@ class Dispatcher extends \lithium\core\StaticObject {
 	 * @return object Group object constructed with the test case or group passed in $options.
 	 */
 	protected static function _report($group, $options) {
-		$report = Libraries::locate('test', static::$_classes['report']);
-		$class = static::_instance($report, compact('group') + $options);
-		return $class;
+		return Libraries::instance(
+			'test', static::$_classes['report'], compact('group') + $options
+		);
 	}
 }
 

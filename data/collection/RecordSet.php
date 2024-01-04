@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -56,10 +56,10 @@ class RecordSet extends \lithium\data\Collection {
 	 * Initializes the record set and uses the database connection to get the column list contained
 	 * in the query that created this object.
 	 *
-	 * @see lithium\data\collection\RecordSet::$_columns
-	 * @return void
 	 * @todo The part that uses _handle->schema() should be rewritten so that the column list
 	 *       is coming from the query object.
+	 * @see lithium\data\collection\RecordSet::$_columns
+	 * @return void
 	 */
 	protected function _init() {
 		parent::_init();
@@ -100,6 +100,20 @@ class RecordSet extends \lithium\data\Collection {
 		return $result;
 	}
 
+	/**
+	 * Sets item to passed data with the key from the query object or a given offset.
+	 *
+	 * Due to behaviour changes in PHP 7.3 and above the internal array pointer of the
+	 * `$_data` property might not be updated after setting a value by key. To preserve
+	 * the behavior the internal array pointer is updated manually using `reset()` and
+	 * `end()`.
+	 *
+	 * @link https://bugs.php.net/bug.php?id=78529
+	 * @param mixed $data
+	 * @param integer $offset
+	 * @param array $options
+	 * @return mixed $data
+	 */
 	protected function _set($data = null, $offset = null, $options = []) {
 		if ($model = $this->_model) {
 			$options += ['defaults' => false];
@@ -111,7 +125,13 @@ class RecordSet extends \lithium\data\Collection {
 		if (is_array($key)) {
 			$key = count($key) === 1 ? current($key) : null;
 		}
-		return $key !== null ? $this->_data[$key] = $data : $this->_data[] = $data;
+		if ($key === null) {
+			return $this->_data[] = $data;
+		}
+		reset($this->_data);
+		$this->_data[$key] = $data;
+		end($this->_data);
+		return $data;
 	}
 
 	/**
@@ -129,7 +149,7 @@ class RecordSet extends \lithium\data\Collection {
 	 *
 	 * @throws RuntimeException
 	 * @param array $row 2 dimensional PDO `Result` array
-	 * @return object Returns a `Record` object
+	 * @return \lithium\data\entity\Record Returns a `Record` object.
 	 */
 	protected function _mapRecord($row) {
 		$main = array_intersect_key($row, $this->_keyIndex);

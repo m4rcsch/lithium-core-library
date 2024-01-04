@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -96,8 +96,11 @@ class Php extends \lithium\g11n\catalog\Adapter {
 			foreach (require $file as $id => $translated) {
 				if (strpos($id, '|') !== false) {
 					list($id, $context) = explode('|', $id);
+
+					$data = $this->_merge($data, compact('id', 'translated', 'context'));
+				} else {
+					$data = $this->_merge($data, compact('id', 'translated'));
 				}
-				$data = $this->_merge($data, compact('id', 'translated', 'context'));
 			}
 		}
 		return $data;

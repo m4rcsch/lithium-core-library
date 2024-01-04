@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -36,11 +36,11 @@ class AffectedTest extends \lithium\test\Unit {
 
 	public function testSingleTestWithSingleResult() {
 		$group = new Group();
-		$group->add('lithium\tests\cases\core\StaticObjectTest');
+		$group->add('lithium\tests\cases\core\StaticObjectDeprecatedTest');
 		$this->report->group = $group;
 		$tests = Affected::apply($this->report, $group->tests());
 
-		$expected = ['lithium\tests\cases\core\StaticObjectTest'];
+		$expected = ['lithium\tests\cases\core\StaticObjectDeprecatedTest'];
 		$result = $tests->map('get_class', ['collect' => false]);
 		$this->assertEqual($expected, $result);
 	}

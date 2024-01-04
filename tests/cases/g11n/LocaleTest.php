@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -492,17 +492,32 @@ class LocaleTest extends \lithium\test\Unit {
 		$this->assertNull($result);
 	}
 
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToParentCall() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$this->assertTrue(Locale::respondsTo('invokeMethod'));
 		$this->assertFalse(Locale::respondsTo('fooBarBaz'));
+
+		error_reporting($backup);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsToMagic() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$this->assertTrue(Locale::respondsTo('language'));
 		$this->assertTrue(Locale::respondsTo('territory'));
 		$this->assertFalse(Locale::respondsTo('foobar'));
-	}
 
+		error_reporting($backup);
+	}
 }
 
 ?>

@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2011, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -28,19 +28,19 @@ class ComplexityTest extends \lithium\test\Unit {
 	 */
 	protected $_paths = [
 		'complexity' => 'lithium\test\filter\Complexity',
-		'testClass' => 'lithium\core\StaticObject',
-		'testClassTest' => 'lithium\tests\cases\core\StaticObjectTest'
+		'testClass' => 'lithium\core\StaticObjectDeprecated',
+		'testClassTest' => 'lithium\tests\cases\core\StaticObjectDeprecatedTest'
 	];
 
 	/**
 	 * Helper array which stores the expected results to clean up the tests.
 	 */
 	protected $_metrics = [
-		'invokeMethod' => 7,
 		'respondsTo' => 1,
-		'_instance' => 2,
-		'_parents' => 2,
+		'invokeMethod' => 7,
+		'_instance' => 1,
 		'_stop' => 1,
+		'_parents' => 2,
 		'applyFilter' => 4,
 		'_filter' => 3
 	];
@@ -88,7 +88,7 @@ class ComplexityTest extends \lithium\test\Unit {
 		Complexity::apply($this->report, $group->tests());
 
 		$results = Complexity::analyze($this->report);
-		$expected = ['class' => [$this->_paths['testClass'] => 2.8999999999999999]];
+		$expected = ['class' => [$this->_paths['testClass'] => 2.7]];
 		foreach ($this->_metrics as $method => $metric) {
 			$expected['max'][$this->_paths['testClass'] . '::' . $method . '()'] = $metric;
 		}

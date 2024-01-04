@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -291,12 +291,20 @@ class ServiceTest extends \lithium\test\Unit {
 		$this->assertEqual('success', $response->body());
 	}
 
+	/* Deprecated / BC */
+
+	/**
+	 * @deprecated
+	 */
 	public function testRespondsTo() {
+		error_reporting(($backup = error_reporting()) & ~E_USER_DEPRECATED);
+
 		$query = new Service();
 		$this->assertTrue($query->respondsTo('foobarbaz'));
 		$this->assertFalse($query->respondsTo(0));
-	}
 
+		error_reporting($backup);
+	}
 }
 
 ?>

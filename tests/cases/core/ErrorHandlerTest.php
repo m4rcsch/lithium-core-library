@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2010, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -14,7 +14,7 @@ use Exception;
 use UnexpectedValueException;
 use lithium\core\ErrorHandler;
 use lithium\aop\Filters;
-use lithium\tests\mocks\core\MockStaticObject;
+use lithium\tests\mocks\core\MockStaticObjectDeprecated;
 use lithium\tests\mocks\core\MockErrorHandler;
 
 class ErrorHandlerTest extends \lithium\test\Unit {
@@ -106,14 +106,14 @@ class ErrorHandlerTest extends \lithium\test\Unit {
 	}
 
 	public function testApply() {
-		$class = 'lithium\tests\mocks\core\MockStaticObject';
+		$class = 'lithium\tests\mocks\core\MockStaticObjectDeprecated';
 
 		ErrorHandler::apply("{$class}::throwException", [], function($details) {
 			return $details['exception']->getMessage();
 		});
-		$this->assertEqual('foo', MockStaticObject::throwException());
+		$this->assertEqual('foo', MockStaticObjectDeprecated::throwException());
 
-		Filters::clear('lithium\tests\mocks\core\MockStaticObject');
+		Filters::clear('lithium\tests\mocks\core\MockStaticObjectDeprecated');
 	}
 
 	public function testTrace() {
@@ -169,12 +169,12 @@ class ErrorHandlerTest extends \lithium\test\Unit {
 	}
 
 	public function testRenderedOutput() {
-		$class = 'lithium\tests\mocks\core\MockStaticObject';
+		$class = 'lithium\tests\mocks\core\MockStaticObjectDeprecated';
 
 		ob_start();
 		echo 'Some Output';
 		ErrorHandler::apply("{$class}::throwException", [], function($details) {});
-		MockStaticObject::throwException();
+		MockStaticObjectDeprecated::throwException();
 		$this->assertEmpty(ob_get_length());
 	}
 }

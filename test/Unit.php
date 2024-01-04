@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -38,7 +38,7 @@ use RecursiveIteratorIterator;
  *
  * @see lithium\test\Unit::assertException()
  */
-class Unit extends \lithium\core\Object {
+class Unit extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * The Reference to a test reporter class.
@@ -465,6 +465,8 @@ class Unit extends \lithium\core\Object {
 	 * @return boolean `true` if the assertion succeeded, `false` otherwise.
 	 */
 	public function assertException($expected, $closure, $message = '{:message}') {
+		$result = null;
+
 		try {
 			$closure();
 			$message = sprintf('An exception "%s" was expected but not thrown.', $expected);
@@ -512,6 +514,8 @@ class Unit extends \lithium\core\Object {
 	 * @return boolean `true` if the assertion succeeded, `false` otherwise.
 	 */
 	public function assertNotException($expected, $closure, $message = '{:message}') {
+		$result = null;
+
 		try {
 			$closure();
 		} catch (Exception $e) {
@@ -823,6 +827,7 @@ class Unit extends \lithium\core\Object {
 	 * @return boolean `true` if the assertion succeeded, `false` otherwise.
 	 */
 	public function assertCookie($expected, $headers = null) {
+		$result = null;
 		$matched = $this->_cookieMatch($expected, $headers);
 		if (!$matched['match']) {
 			$message = sprintf('%s - Cookie not found in headers.', $matched['pattern']);
@@ -1467,8 +1472,8 @@ class Unit extends \lithium\core\Object {
 	 * Assert that a class does have a given _static_ attribute.
 	 *
 	 * ```
-	 * $this->assertClassHasStaticAttribute('_methodFilters', '\lithium\core\StaticObject'); // succeeds
-	 * $this->assertClassHasStaticAttribute('foobar', '\lithium\core\StaticObject'); // fails
+	 * $this->assertClassHasStaticAttribute('_methodFilters', '\lithium\core\StaticObjectDeprecated'); // succeeds
+	 * $this->assertClassHasStaticAttribute('foobar', '\lithium\core\StaticObjectDeprecated'); // fails
 	 * ```
 	 *
 	 * @see lithium\test\Unit::assert()
@@ -1498,8 +1503,8 @@ class Unit extends \lithium\core\Object {
 	 * Assert that a class does *not* have a given _static_ attribute.
 	 *
 	 * ```
-	 * $this->assertClassNotHasStaticAttribute('foobar', '\lithium\core\StaticObject'); // succeeds
-	 * $this->assertClassNotHasStaticAttribute('_methodFilters', '\lithium\core\StaticObject'); // fails
+	 * $this->assertClassNotHasStaticAttribute('foobar', '\lithium\core\StaticObjectDeprecated'); // succeeds
+	 * $this->assertClassNotHasStaticAttribute('_methodFilters', '\lithium\core\StaticObjectDeprecated'); // fails
 	 * ```
 	 *
 	 * @see lithium\test\Unit::assert()

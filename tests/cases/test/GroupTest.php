@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -13,7 +13,7 @@ use lithium\test\Group;
 use lithium\core\Libraries;
 use lithium\util\Collection;
 use lithium\tests\cases\data\ModelTest;
-use lithium\tests\cases\core\ObjectTest;
+use lithium\tests\cases\core\ObjectDeprecatedTest;
 use lithium\tests\mocks\test\cases\MockTest;
 use lithium\tests\mocks\test\cases\MockErrorHandlingTest;
 use lithium\tests\mocks\test\cases\MockSkipThrowsExceptionTest;
@@ -94,9 +94,9 @@ class GroupTest extends \lithium\test\Unit {
 
 	public function testAddByMixedThroughConstructor() {
 		$group = new Group(['data' => [
-			'lithium\tests\cases\data\ModelTest', new ObjectTest()
+			'lithium\tests\cases\data\ModelTest', new ObjectDeprecatedTest()
 		]]);
-		$expected = new Collection(['data' => [new ModelTest(), new ObjectTest()]]);
+		$expected = new Collection(['data' => [new ModelTest(), new ObjectDeprecatedTest()]]);
 		$result = $group->tests();
 		$this->assertEqual($expected, $result);
 	}

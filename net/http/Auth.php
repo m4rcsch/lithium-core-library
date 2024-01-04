@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2012, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -18,7 +18,7 @@ namespace lithium\net\http;
  * @see lithium\net\http\Response::digest()
  * @see lithium\security\auth\adapter\Http
  */
-class Auth extends \lithium\core\StaticObject {
+class Auth extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * The NC value needed for digest authentication

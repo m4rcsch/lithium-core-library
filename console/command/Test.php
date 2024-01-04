@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -30,8 +30,8 @@ class Test extends \lithium\console\Command {
 	 *
 	 * For example:
 	 * ```sh
-	 * lithium test lithium/tests/cases/core/ObjectTest.php --filters=Coverage
-	 * lithium test lithium/tests/cases/core/ObjectTest.php --filters=Coverage,Profiler
+	 * lithium test lithium/tests/cases/core/LibrariesTest.php --filters=Coverage
+	 * lithium test lithium/tests/cases/core/LibrariesTest.php --filters=Coverage,Profiler
 	 * ```
 	 *
 	 * @var string Name of a filter or a comma separated list of filter names. Builtin filters:
@@ -165,10 +165,9 @@ class Test extends \lithium\console\Command {
 			},
 			'json' => function($runner, $path) use ($command) {
 				$report = $runner();
+				$filters = [];
 
 				if ($results = $report->filters()) {
-					$filters = [];
-
 					foreach ($results as $filter => $options) {
 						$filters[$options['name']] = $report->results['filters'][$filter];
 					}
@@ -184,7 +183,7 @@ class Test extends \lithium\console\Command {
 	 * test(s) may be absolute or relative to the current working directory.
 	 *
 	 * ```sh
-	 * li3 test lithium/tests/cases/core/ObjectTest.php
+	 * li3 test lithium/tests/cases/core/LibrariesTest.php
 	 * li3 test lithium/tests/cases/core
 	 * ```
 	 *
@@ -270,11 +269,11 @@ class Test extends \lithium\console\Command {
 	 * This method can be thought of the reverse of `Libraries::path()`.
 	 *
 	 * ```
-	 * lithium/tests/cases/core/ObjectTest.php -> lithium\tests\cases\core\ObjectTest
-	 * lithium/tests/cases/core                -> lithium\tests\cases\core
-	 * lithium/core/Object.php                 -> lithium\core\Object
-	 * lithium/core/                           -> lithium\core
-	 * lithium/core                            -> lithium\core
+	 * lithium/tests/cases/core/LibrariesTest.php -> lithium\tests\cases\core\LibrariesTest
+	 * lithium/tests/cases/core                   -> lithium\tests\cases\core
+	 * lithium/core/Libraries.php                 -> lithium\core\Libraries
+	 * lithium/core/                              -> lithium\core
+	 * lithium/core                               -> lithium\core
 	 * ```
 	 *
 	 * @see lithium\core\Libraries::path()

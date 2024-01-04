@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -13,6 +13,7 @@ use PDO;
 use PDOException;
 use lithium\aop\Filters;
 use lithium\core\ConfigException;
+use lithium\core\Libraries;
 use lithium\net\HostString;
 
 /**
@@ -261,7 +262,7 @@ class MySql extends \lithium\data\source\Database {
 			extract($params);
 
 			if ($fields) {
-				return $this->_instance('schema', compact('fields'));
+				return Libraries::instance(null, 'schema', compact('fields'), $this->_classes);
 			}
 			$name = $this->_entityName($entity, ['quoted' => true]);
 			$columns = $this->read("DESCRIBE {$name}", ['return' => 'array', 'schema' => [
@@ -283,7 +284,7 @@ class MySql extends \lithium\data\source\Database {
 					'default'  => $default
 				];
 			}
-			return $this->_instance('schema', compact('fields'));
+			return Libraries::instance(null, 'schema', compact('fields'), $this->_classes);
 		});
 	}
 
@@ -405,7 +406,7 @@ class MySql extends \lithium\data\source\Database {
 			} catch (PDOException $e) {
 				$this->_error($params['sql']);
 			};
-			return $this->_instance('result', compact('resource'));
+			return Libraries::instance(null, 'result', compact('resource'), $this->_classes);
 		});
 	}
 

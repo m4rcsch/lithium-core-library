@@ -2,7 +2,7 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
@@ -865,7 +865,7 @@ class UnitTest extends \lithium\test\Unit {
 	}
 
 	public function testClassHasStaticAttributeTrue() {
-		$class = '\lithium\core\StaticObject';
+		$class = '\lithium\core\StaticObjectDeprecated';
 		$this->assertTrue($this->test->assertClassHasStaticAttribute('_methodFilters', $class));
 
 		$results = $this->test->results();
@@ -875,7 +875,7 @@ class UnitTest extends \lithium\test\Unit {
 	}
 
 	public function testClassHasStaticAttributeFalse() {
-		$class = '\lithium\core\StaticObject';
+		$class = '\lithium\core\StaticObjectDeprecated';
 		$this->assertFalse($this->test->assertClassHasStaticAttribute('foobar', $class));
 
 		$results = $this->test->results();
@@ -885,8 +885,8 @@ class UnitTest extends \lithium\test\Unit {
 		$this->assertEqual([
 			'expected' => 'foobar',
 			'result' => [
-				new \ReflectionProperty('lithium\core\StaticObject', '_parents'),
-				new \ReflectionProperty('lithium\core\StaticObject', '_methodFilters')
+				new \ReflectionProperty('lithium\core\StaticObjectDeprecated', '_parents'),
+				new \ReflectionProperty('lithium\core\StaticObjectDeprecated', '_methodFilters')
 			]
 		], $result['data']);
 	}
@@ -899,7 +899,7 @@ class UnitTest extends \lithium\test\Unit {
 	}
 
 	public function testClassNotHasStaticAttributeTrue() {
-		$class = '\lithium\core\StaticObject';
+		$class = '\lithium\core\StaticObjectDeprecated';
 		$this->assertTrue($this->test->assertClassNotHasStaticAttribute('foobar', $class));
 
 		$results = $this->test->results();
@@ -909,7 +909,7 @@ class UnitTest extends \lithium\test\Unit {
 	}
 
 	public function testClassNotHasStaticAttributeFalse() {
-		$class = '\lithium\core\StaticObject';
+		$class = '\lithium\core\StaticObjectDeprecated';
 		$this->assertFalse($this->test->assertClassNotHasStaticAttribute('_methodFilters', $class));
 
 		$results = $this->test->results();
@@ -919,8 +919,8 @@ class UnitTest extends \lithium\test\Unit {
 		$this->assertEqual([
 			'expected' => '_methodFilters',
 			'result' => [
-				new \ReflectionProperty('lithium\core\StaticObject', '_parents'),
-				new \ReflectionProperty('lithium\core\StaticObject', '_methodFilters')
+				new \ReflectionProperty('lithium\core\StaticObjectDeprecated', '_parents'),
+				new \ReflectionProperty('lithium\core\StaticObjectDeprecated', '_methodFilters')
 			]
 		], $result['data']);
 	}

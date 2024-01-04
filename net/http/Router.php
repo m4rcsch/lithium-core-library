@@ -2,15 +2,16 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\net\http;
 
-use lithium\util\Inflector;
+use lithium\core\Libraries;
 use lithium\net\http\RoutingException;
+use lithium\util\Inflector;
 
 /**
  * The two primary responsibilities of the `Router` are to determine the correct set of
@@ -56,7 +57,7 @@ use lithium\net\http\RoutingException;
  * @see lithium\net\http\Router::parse()
  * @see lithium\net\http\Router::match()
  */
-class Router extends \lithium\core\StaticObject {
+class Router extends \lithium\core\StaticObjectDeprecated {
 
 	/**
 	 * Contain the configuration of scopes.
@@ -194,7 +195,9 @@ class Router extends \lithium\core\StaticObject {
 			'modifiers' => static::modifiers(),
 			'unicode' => static::$_unicode
 		];
-		return (static::$_configurations[$name][] = static::_instance('route', $config));
+		return static::$_configurations[$name][] = Libraries::instance(
+			null, 'route', $config, static::$_classes
+		);
 	}
 
 	/**
@@ -482,7 +485,7 @@ class Router extends \lithium\core\StaticObject {
 			}
 		}
 		if ($config = static::attached($scope, $vars)) {
-			if (is_array($url)) {
+			if (is_array($url) && $config['library'] !== false) {
 				unset($url['library']);
 			}
 			$config['host'] = $config['host'] ? : $defaults['host'];
@@ -756,15 +759,22 @@ class Router extends \lithium\core\StaticObject {
 	 * ]);
 	 * ```
 	 *
-	 * By default all routes attached to an `'app'` scope are attached to a library of the
-	 * same name (i.e. the `'app'` library in this case). So you don't need to deal with an
-	 * extra library in your routes definition when you are using scopes.
+	 * When using scoped routes, just the scope must be given to match a route. The library
+	 * is already derived from the scope for you. This way you can keep route definitions short
+	 * and sweet while still using scopes.
 	 *
-	 * Moreover you can override the attached library name with:
+	 * By default the library is directly derived from the scope name. So that all routes
+	 * attached to an `'app'` scope are attached to a library of the same name (i.e. the `'app'`
+	 * library in this case).
+	 *
+	 * This behavior can be overridden like so:
 	 * ```
-	 * Router::attach('app', [
-	 *     'library' => 'custom_library_name'
-	 * ]);
+	 * Router::attach('app', ['library' => 'foo']);
+	 * ```
+	 *
+	 * Or disable it and continue to use scope and library name in route definitions:
+	 * ```
+	 * Router::attach('app', ['library' => false]);
 	 * ```
 	 *
 	 * @see lithium\net\http\Router::scope()
@@ -867,8 +877,7 @@ class Router extends \lithium\core\StaticObject {
 	 * Initialize `static::$_scopes` with a `lithium\core\Configuration` instance.
 	 */
 	protected static function _initScopes() {
-		static::$_scopes = static::_instance('configuration');
-
+		static::$_scopes = Libraries::instance(null, 'configuration', [], static::$_classes);
 		static::$_scopes->initConfig = function($name, $config) {
 			$defaults = [
 				'absolute' => false,

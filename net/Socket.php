@@ -2,19 +2,21 @@
 /**
  * li₃: the most RAD framework for PHP (http://li3.me)
  *
- * Copyright 2016, Union of RAD. All rights reserved. This source
+ * Copyright 2009, Union of RAD. All rights reserved. This source
  * code is distributed under the terms of the BSD 3-Clause License.
  * The full license text can be found in the LICENSE.txt file.
  */
 
 namespace lithium\net;
 
+use lithium\core\Libraries;
+
 /**
  * Abstract class for connecting to sockets with various adapters.
  *
  * Currently, Curl, Stream and Context adapters are available.
  */
-abstract class Socket extends \lithium\core\Object {
+abstract class Socket extends \lithium\core\ObjectDeprecated {
 
 	/**
 	 * The resource for the current connection.
@@ -146,7 +148,7 @@ abstract class Socket extends \lithium\core\Object {
 
 		if ($this->write($message)) {
 			$config = ['message' => $this->read()] + $this->_config;
-			return $this->_instance($options['response'], $config);
+			return Libraries::instance(null, $options['response'], $config, $this->_classes);
 		}
 	}
 
